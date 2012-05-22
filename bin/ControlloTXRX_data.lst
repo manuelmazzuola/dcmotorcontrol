@@ -1,0 +1,165 @@
+   1               		.file	"ControlloTXRX_data.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               	.global	ControlloTXRX_P
+   9               		.data
+  12               	ControlloTXRX_P:
+  13 0000 00        		.byte	0
+  14 0001 00        		.byte	0
+  15 0002 00        		.byte	0
+  16 0003 00        		.byte	0
+  17 0004 0A        		.byte	10
+  18 0005 D7        		.byte	-41
+  19 0006 23        		.byte	35
+  20 0007 3C        		.byte	60
+  21 0008 00        		.byte	0
+  22 0009 00        		.byte	0
+  23 000a A0        		.byte	-96
+  24 000b 41        		.byte	65
+  25 000c CD        		.byte	-51
+  26 000d CC        		.byte	-52
+  27 000e CC        		.byte	-52
+  28 000f 3C        		.byte	60
+  29 0010 00        		.byte	0
+  30 0011 00        		.byte	0
+  31 0012 00        		.byte	0
+  32 0013 00        		.byte	0
+  33 0014 CD        		.byte	-51
+  34 0015 CC        		.byte	-52
+  35 0016 CC        		.byte	-52
+  36 0017 3D        		.byte	61
+  37 0018 CD        		.byte	-51
+  38 0019 CC        		.byte	-52
+  39 001a CC        		.byte	-52
+  40 001b BD        		.byte	-67
+  41 001c 0A        		.byte	10
+  42 001d D7        		.byte	-41
+  43 001e 23        		.byte	35
+  44 001f 3E        		.byte	62
+  45 0020 39        		.byte	57
+  46 0021 B4        		.byte	-76
+  47 0022 C8        		.byte	-56
+  48 0023 3C        		.byte	60
+  49 0024 00        		.byte	0
+  50 0025 00        		.byte	0
+  51 0026 00        		.byte	0
+  52 0027 00        		.byte	0
+  53 0028 CD        		.byte	-51
+  54 0029 CC        		.byte	-52
+  55 002a CC        		.byte	-52
+  56 002b 3D        		.byte	61
+  57 002c CD        		.byte	-51
+  58 002d CC        		.byte	-52
+  59 002e CC        		.byte	-52
+  60 002f BD        		.byte	-67
+  61 0030 D3        		.byte	-45
+  62 0031 4D        		.byte	77
+  63 0032 62        		.byte	98
+  64 0033 3E        		.byte	62
+  65 0034 CD        		.byte	-51
+  66 0035 CC        		.byte	-52
+  67 0036 4C        		.byte	76
+  68 0037 3E        		.byte	62
+  69 0038 E5        		.byte	-27
+  70 0039 D0        		.byte	-48
+  71 003a 02        		.byte	2
+  72 003b 3F        		.byte	63
+  73 003c 00        		.byte	0
+  74 003d 00        		.byte	0
+  75 003e 00        		.byte	0
+  76 003f 00        		.byte	0
+  77 0040 CD        		.byte	-51
+  78 0041 CC        		.byte	-52
+  79 0042 CC        		.byte	-52
+  80 0043 3D        		.byte	61
+  81 0044 00        		.byte	0
+  82 0045 00        		.byte	0
+  83 0046 00        		.byte	0
+  84 0047 00        		.byte	0
+  85 0048 00        		.byte	0
+  86 0049 00        		.byte	0
+  87 004a 80        		.byte	-128
+  88 004b 3F        		.byte	63
+  89 004c 00        		.byte	0
+  90 004d 00        		.byte	0
+  91 004e 00        		.byte	0
+  92 004f 00        		.byte	0
+  93 0050 00        		.byte	0
+  94 0051 00        		.byte	0
+  95 0052 7F        		.byte	127
+  96 0053 43        		.byte	67
+  97 0054 00        		.byte	0
+  98 0055 00        		.byte	0
+  99 0056 00        		.byte	0
+ 100 0057 00        		.byte	0
+ 101 0058 00        		.byte	0
+ 102 0059 00        		.byte	0
+ 103 005a 00        		.byte	0
+ 104 005b 00        		.byte	0
+ 105 005c 00        		.byte	0
+ 106 005d 00        		.byte	0
+ 107 005e 00        		.byte	0
+ 108 005f 00        		.byte	0
+ 109 0060 00        		.byte	0
+ 110 0061 00        		.byte	0
+ 111 0062 00        		.byte	0
+ 112 0063 00        		.byte	0
+ 113 0064 00        		.byte	0
+ 114 0065 00        		.byte	0
+ 115 0066 00        		.byte	0
+ 116 0067 00        		.byte	0
+ 117 0068 0000      		.word	0
+ 118 006a 0000      		.word	0
+ 119 006c 0000      		.word	0
+ 120 006e 0000      		.word	0
+ 121 0070 0050      		.word	20480
+ 122 0072 00        		.byte	0
+ 123 0073 00        		.byte	0
+ 124 0074 00        		.byte	0
+ 125               		.comm rif,2,1
+ 126               		.comm jRx,1,1
+ 127               		.comm TCHAR,1,1
+ 128               		.comm TCHARL1,1,1
+ 129               		.comm TCHARH1,1,1
+ 130               		.comm TCHARL2,1,1
+ 131               		.comm TCHARH2,1,1
+ 132               		.comm Aold,1,1
+ 133               		.comm Bold,1,1
+ 134               		.comm vel_tmp,2,1
+ 135               		.comm start,1,1
+ 136               		.comm overflow,1,1
+ 137               		.comm VNow,1,1
+ 138               		.comm semaforo,2,1
+ 139               	.global __do_copy_data
+ 140               	.global __do_clear_bss
+DEFINED SYMBOLS
+                            *ABS*:00000000 ControlloTXRX_data.c
+C:\Users\AMMINI~1\AppData\Local\Temp/ccqvIwvh.s:2      *ABS*:0000003f __SREG__
+C:\Users\AMMINI~1\AppData\Local\Temp/ccqvIwvh.s:3      *ABS*:0000003e __SP_H__
+C:\Users\AMMINI~1\AppData\Local\Temp/ccqvIwvh.s:4      *ABS*:0000003d __SP_L__
+C:\Users\AMMINI~1\AppData\Local\Temp/ccqvIwvh.s:5      *ABS*:00000034 __CCP__
+C:\Users\AMMINI~1\AppData\Local\Temp/ccqvIwvh.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\AMMINI~1\AppData\Local\Temp/ccqvIwvh.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\AMMINI~1\AppData\Local\Temp/ccqvIwvh.s:12     .data:00000000 ControlloTXRX_P
+                            *COM*:00000002 rif
+                            *COM*:00000001 jRx
+                            *COM*:00000001 TCHAR
+                            *COM*:00000001 TCHARL1
+                            *COM*:00000001 TCHARH1
+                            *COM*:00000001 TCHARL2
+                            *COM*:00000001 TCHARH2
+                            *COM*:00000001 Aold
+                            *COM*:00000001 Bold
+                            *COM*:00000002 vel_tmp
+                            *COM*:00000001 start
+                            *COM*:00000001 overflow
+                            *COM*:00000001 VNow
+                            *COM*:00000002 semaforo
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss

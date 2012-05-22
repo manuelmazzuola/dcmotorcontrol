@@ -1,0 +1,1813 @@
+   1               		.file	"ControlloTXRX.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.global	comandaMotore
+  11               	comandaMotore:
+  12               	/* prologue: function */
+  13               	/* frame size = 0 */
+  14 0000 8091 0000 		lds r24,DUTYmotore1
+  15 0004 87BD      		out 71-32,r24
+  16 0006 8091 0000 		lds r24,segno
+  17 000a 8823      		tst r24
+  18 000c 01F0      		breq .L6
+  19 000e 2B9A      		sbi 37-32,3
+  20 0010 2998      		cbi 37-32,1
+  21 0012 0895      		ret
+  22               	.L6:
+  23 0014 2B98      		cbi 37-32,3
+  24 0016 299A      		sbi 37-32,1
+  25 0018 0895      		ret
+  27               	.global	__vector_13
+  29               	__vector_13:
+  30 001a 1F92      		push __zero_reg__
+  31 001c 0F92      		push r0
+  32 001e 0FB6      		in r0,__SREG__
+  33 0020 0F92      		push r0
+  34 0022 1124      		clr __zero_reg__
+  35 0024 2F93      		push r18
+  36 0026 3F93      		push r19
+  37 0028 4F93      		push r20
+  38 002a 8F93      		push r24
+  39 002c 9F93      		push r25
+  40               	/* prologue: Signal */
+  41               	/* frame size = 0 */
+  42 002e 4091 C600 		lds r20,198
+  43 0032 8091 0000 		lds r24,jRx
+  44 0036 8823      		tst r24
+  45 0038 01F0      		breq .L13
+  46 003a 8091 0000 		lds r24,rif
+  47 003e 9091 0000 		lds r25,(rif)+1
+  48 0042 342F      		mov r19,r20
+  49 0044 20E0      		ldi r18,lo8(0)
+  50 0046 280F      		add r18,r24
+  51 0048 391F      		adc r19,r25
+  52 004a 3093 0000 		sts (rif)+1,r19
+  53 004e 2093 0000 		sts rif,r18
+  54 0052 8091 0000 		lds r24,rif
+  55 0056 9091 0000 		lds r25,(rif)+1
+  56 005a 97FD      		sbrc r25,7
+  57 005c 00C0      		rjmp .L14
+  58 005e 8091 0000 		lds r24,rif
+  59 0062 9091 0000 		lds r25,(rif)+1
+  60 0066 9093 0000 		sts (Riferimento)+1,r25
+  61 006a 8093 0000 		sts Riferimento,r24
+  62               	.L11:
+  63 006e 1092 0000 		sts jRx,__zero_reg__
+  64               	.L12:
+  65               	/* epilogue start */
+  66 0072 9F91      		pop r25
+  67 0074 8F91      		pop r24
+  68 0076 4F91      		pop r20
+  69 0078 3F91      		pop r19
+  70 007a 2F91      		pop r18
+  71 007c 0F90      		pop r0
+  72 007e 0FBE      		out __SREG__,r0
+  73 0080 0F90      		pop r0
+  74 0082 1F90      		pop __zero_reg__
+  75 0084 1895      		reti
+  76               	.L13:
+  77 0086 842F      		mov r24,r20
+  78 0088 90E0      		ldi r25,lo8(0)
+  79 008a 9093 0000 		sts (rif)+1,r25
+  80 008e 8093 0000 		sts rif,r24
+  81 0092 8091 0000 		lds r24,jRx
+  82 0096 8F5F      		subi r24,lo8(-(1))
+  83 0098 8093 0000 		sts jRx,r24
+  84 009c 00C0      		rjmp .L12
+  85               	.L14:
+  86 009e 8091 0000 		lds r24,rif
+  87 00a2 9091 0000 		lds r25,(rif)+1
+  88 00a6 8050      		subi r24,lo8(-(-32768))
+  89 00a8 9048      		sbci r25,hi8(-(-32768))
+  90 00aa 9093 0000 		sts (rif)+1,r25
+  91 00ae 8093 0000 		sts rif,r24
+  92 00b2 8091 0000 		lds r24,rif
+  93 00b6 9091 0000 		lds r25,(rif)+1
+  94 00ba 9095      		com r25
+  95 00bc 8195      		neg r24
+  96 00be 9F4F      		sbci r25,lo8(-1)
+  97 00c0 9093 0000 		sts (Riferimento)+1,r25
+  98 00c4 8093 0000 		sts Riferimento,r24
+  99 00c8 00C0      		rjmp .L11
+ 101               	.global	ADC_read
+ 103               	ADC_read:
+ 104 00ca EF92      		push r14
+ 105 00cc FF92      		push r15
+ 106 00ce 0F93      		push r16
+ 107 00d0 1F93      		push r17
+ 108               	/* prologue: function */
+ 109               	/* frame size = 0 */
+ 110 00d2 8091 7A00 		lds r24,122
+ 111 00d6 8064      		ori r24,lo8(64)
+ 112 00d8 8093 7A00 		sts 122,r24
+ 113               	.L16:
+ 114 00dc 8091 7A00 		lds r24,122
+ 115 00e0 86FD      		sbrc r24,6
+ 116 00e2 00C0      		rjmp .L16
+ 117 00e4 6091 7800 		lds r22,120
+ 118 00e8 70E0      		ldi r23,lo8(0)
+ 119 00ea 80E0      		ldi r24,lo8(0)
+ 120 00ec 90E0      		ldi r25,hi8(0)
+ 121 00ee 0E94 0000 		call __floatunsisf
+ 122 00f2 7B01      		movw r14,r22
+ 123 00f4 8C01      		movw r16,r24
+ 124 00f6 2091 7900 		lds r18,121
+ 125 00fa 722F      		mov r23,r18
+ 126 00fc 60E0      		ldi r22,lo8(0)
+ 127 00fe 8827      		clr r24
+ 128 0100 77FD      		sbrc r23,7
+ 129 0102 8095      		com r24
+ 130 0104 982F      		mov r25,r24
+ 131 0106 0E94 0000 		call __floatsisf
+ 132 010a A801      		movw r20,r16
+ 133 010c 9701      		movw r18,r14
+ 134 010e 0E94 0000 		call __addsf3
+ 135 0112 22E3      		ldi r18,lo8(0x3bd33332)
+ 136 0114 33E3      		ldi r19,hi8(0x3bd33332)
+ 137 0116 43ED      		ldi r20,hlo8(0x3bd33332)
+ 138 0118 5BE3      		ldi r21,hhi8(0x3bd33332)
+ 139 011a 0E94 0000 		call __mulsf3
+ 140               	/* epilogue start */
+ 141 011e 1F91      		pop r17
+ 142 0120 0F91      		pop r16
+ 143 0122 FF90      		pop r15
+ 144 0124 EF90      		pop r14
+ 145 0126 0895      		ret
+ 147               	.global	TX
+ 149               	TX:
+ 150 0128 EF92      		push r14
+ 151 012a FF92      		push r15
+ 152 012c 0F93      		push r16
+ 153 012e 1F93      		push r17
+ 154 0130 CF93      		push r28
+ 155 0132 DF93      		push r29
+ 156               	/* prologue: function */
+ 157               	/* frame size = 0 */
+ 158 0134 4091 0000 		lds r20,Encoder1
+ 159 0138 5091 0000 		lds r21,Encoder1+1
+ 160 013c CA01      		movw r24,r20
+ 161 013e 9C01      		movw r18,r24
+ 162 0140 97FD      		sbrc r25,7
+ 163 0142 00C0      		rjmp .L40
+ 164               	.L21:
+ 165 0144 2053      		subi r18,lo8(30000)
+ 166 0146 3547      		sbci r19,hi8(30000)
+ 167 0148 04F0      		brlt .L20
+ 168 014a CA01      		movw r24,r20
+ 169 014c 60E3      		ldi r22,lo8(30000)
+ 170 014e 75E7      		ldi r23,hi8(30000)
+ 171 0150 0E94 0000 		call __divmodhi4
+ 172 0154 9093 0000 		sts (Encoder1)+1,r25
+ 173 0158 8093 0000 		sts Encoder1,r24
+ 174               	.L20:
+ 175 015c E090 0000 		lds r14,Posizione
+ 176 0160 F090 0000 		lds r15,(Posizione)+1
+ 177 0164 0091 0000 		lds r16,(Posizione)+2
+ 178 0168 1091 0000 		lds r17,(Posizione)+3
+ 179 016c C801      		movw r24,r16
+ 180 016e B701      		movw r22,r14
+ 181 0170 20E0      		ldi r18,lo8(0x42c80000)
+ 182 0172 30E0      		ldi r19,hi8(0x42c80000)
+ 183 0174 48EC      		ldi r20,hlo8(0x42c80000)
+ 184 0176 52E4      		ldi r21,hhi8(0x42c80000)
+ 185 0178 0E94 0000 		call __mulsf3
+ 186 017c 0E94 0000 		call __fixsfsi
+ 187 0180 EB01      		movw r28,r22
+ 188 0182 77FD      		sbrc r23,7
+ 189 0184 00C0      		rjmp .L41
+ 190               	.L22:
+ 191 0186 C093 0000 		sts TCHARL1,r28
+ 192 018a C801      		movw r24,r16
+ 193 018c B701      		movw r22,r14
+ 194 018e 0E94 0000 		call __fixsfsi
+ 195 0192 77FD      		sbrc r23,7
+ 196 0194 00C0      		rjmp .L42
+ 197 0196 8D2F      		mov r24,r29
+ 198 0198 9927      		clr r25
+ 199 019a 87FD      		sbrc r24,7
+ 200 019c 9A95      		dec r25
+ 201 019e 8093 0000 		sts TCHARH1,r24
+ 202               	.L32:
+ 203 01a2 8091 C000 		lds r24,192
+ 204 01a6 85FF      		sbrs r24,5
+ 205 01a8 00C0      		rjmp .L32
+ 206 01aa 8FEF      		ldi r24,lo8(-1)
+ 207 01ac 8093 C600 		sts 198,r24
+ 208               	.L25:
+ 209 01b0 8091 C000 		lds r24,192
+ 210 01b4 85FF      		sbrs r24,5
+ 211 01b6 00C0      		rjmp .L25
+ 212 01b8 8FEF      		ldi r24,lo8(-1)
+ 213 01ba 8093 C600 		sts 198,r24
+ 214               	.L26:
+ 215 01be 8091 C000 		lds r24,192
+ 216 01c2 85FF      		sbrs r24,5
+ 217 01c4 00C0      		rjmp .L26
+ 218 01c6 8FEF      		ldi r24,lo8(-1)
+ 219 01c8 8093 C600 		sts 198,r24
+ 220               	.L27:
+ 221 01cc 8091 C000 		lds r24,192
+ 222 01d0 85FF      		sbrs r24,5
+ 223 01d2 00C0      		rjmp .L27
+ 224 01d4 8091 0000 		lds r24,TCHARH1
+ 225 01d8 8093 C600 		sts 198,r24
+ 226               	.L28:
+ 227 01dc 8091 C000 		lds r24,192
+ 228 01e0 85FF      		sbrs r24,5
+ 229 01e2 00C0      		rjmp .L28
+ 230 01e4 8091 0000 		lds r24,TCHARL1
+ 231 01e8 8093 C600 		sts 198,r24
+ 232               	.L29:
+ 233 01ec 8091 C000 		lds r24,192
+ 234 01f0 85FF      		sbrs r24,5
+ 235 01f2 00C0      		rjmp .L29
+ 236 01f4 9091 0000 		lds r25,TCHARH1
+ 237 01f8 8091 0000 		lds r24,TCHARL1
+ 238 01fc 890F      		add r24,r25
+ 239 01fe 8093 C600 		sts 198,r24
+ 240               	.L30:
+ 241 0202 8091 C000 		lds r24,192
+ 242 0206 85FF      		sbrs r24,5
+ 243 0208 00C0      		rjmp .L30
+ 244               	/* epilogue start */
+ 245 020a DF91      		pop r29
+ 246 020c CF91      		pop r28
+ 247 020e 1F91      		pop r17
+ 248 0210 0F91      		pop r16
+ 249 0212 FF90      		pop r15
+ 250 0214 EF90      		pop r14
+ 251 0216 0895      		ret
+ 252               	.L42:
+ 253 0218 8D2F      		mov r24,r29
+ 254 021a 9927      		clr r25
+ 255 021c 87FD      		sbrc r24,7
+ 256 021e 9A95      		dec r25
+ 257 0220 8058      		subi r24,lo8(-(-128))
+ 258 0222 8093 0000 		sts TCHARH1,r24
+ 259 0226 00C0      		rjmp .L32
+ 260               	.L41:
+ 261 0228 D095      		com r29
+ 262 022a C195      		neg r28
+ 263 022c DF4F      		sbci r29,lo8(-1)
+ 264 022e 00C0      		rjmp .L22
+ 265               	.L40:
+ 266 0230 3095      		com r19
+ 267 0232 2195      		neg r18
+ 268 0234 3F4F      		sbci r19,lo8(-1)
+ 269 0236 00C0      		rjmp .L21
+ 271               	.global	agg_vel
+ 273               	agg_vel:
+ 274               	/* prologue: function */
+ 275               	/* frame size = 0 */
+ 276 0238 6091 0000 		lds r22,Encoder1
+ 277 023c 7091 0000 		lds r23,(Encoder1)+1
+ 278 0240 8827      		clr r24
+ 279 0242 77FD      		sbrc r23,7
+ 280 0244 8095      		com r24
+ 281 0246 982F      		mov r25,r24
+ 282 0248 0E94 0000 		call __floatsisf
+ 283 024c 2BE3      		ldi r18,lo8(0x3c4e703b)
+ 284 024e 30E7      		ldi r19,hi8(0x3c4e703b)
+ 285 0250 4EE4      		ldi r20,hlo8(0x3c4e703b)
+ 286 0252 5CE3      		ldi r21,hhi8(0x3c4e703b)
+ 287 0254 0E94 0000 		call __mulsf3
+ 288 0258 6093 0000 		sts Posizione,r22
+ 289 025c 7093 0000 		sts (Posizione)+1,r23
+ 290 0260 8093 0000 		sts (Posizione)+2,r24
+ 291 0264 9093 0000 		sts (Posizione)+3,r25
+ 292 0268 8091 0000 		lds r24,overflow
+ 293 026c 8130      		cpi r24,lo8(1)
+ 294 026e 01F0      		breq .L47
+ 295 0270 80E0      		ldi r24,lo8(0x0)
+ 296 0272 90E0      		ldi r25,hi8(0x0)
+ 297 0274 A0E0      		ldi r26,hlo8(0x0)
+ 298 0276 B0E0      		ldi r27,hhi8(0x0)
+ 299 0278 8093 0000 		sts velocita1,r24
+ 300 027c 9093 0000 		sts (velocita1)+1,r25
+ 301 0280 A093 0000 		sts (velocita1)+2,r26
+ 302 0284 B093 0000 		sts (velocita1)+3,r27
+ 303 0288 1092 0000 		sts VNow,__zero_reg__
+ 304               	/* epilogue start */
+ 305 028c 0895      		ret
+ 306               	.L47:
+ 307 028e 6091 0000 		lds r22,vel_tmp
+ 308 0292 7091 0000 		lds r23,(vel_tmp)+1
+ 309 0296 8DE0      		ldi r24,lo8(12557)
+ 310 0298 91E3      		ldi r25,hi8(12557)
+ 311 029a 0E94 0000 		call __divmodhi4
+ 312 029e 8827      		clr r24
+ 313 02a0 77FD      		sbrc r23,7
+ 314 02a2 8095      		com r24
+ 315 02a4 982F      		mov r25,r24
+ 316 02a6 0E94 0000 		call __floatsisf
+ 317 02aa 6093 0000 		sts velocita1,r22
+ 318 02ae 7093 0000 		sts (velocita1)+1,r23
+ 319 02b2 8093 0000 		sts (velocita1)+2,r24
+ 320 02b6 9093 0000 		sts (velocita1)+3,r25
+ 321 02ba 1092 0000 		sts VNow,__zero_reg__
+ 322 02be 0895      		ret
+ 324               	.global	Delay
+ 326               	Delay:
+ 327               	/* prologue: function */
+ 328               	/* frame size = 0 */
+ 329               	/* epilogue start */
+ 330 02c0 0895      		ret
+ 332               	.global	OSCCAL_calibration
+ 334               	OSCCAL_calibration:
+ 335               	/* prologue: function */
+ 336               	/* frame size = 0 */
+ 337 02c2 80E8      		ldi r24,lo8(-128)
+ 338 02c4 8093 6100 		sts 97,r24
+ 339 02c8 83E0      		ldi r24,lo8(3)
+ 340 02ca 8093 6100 		sts 97,r24
+ 341 02ce 1092 7000 		sts 112,__zero_reg__
+ 342 02d2 88E0      		ldi r24,lo8(8)
+ 343 02d4 8093 B600 		sts 182,r24
+ 344 02d8 88EC      		ldi r24,lo8(-56)
+ 345 02da 8093 B300 		sts 179,r24
+ 346 02de 1092 6E00 		sts 110,__zero_reg__
+ 347 02e2 81E0      		ldi r24,lo8(1)
+ 348 02e4 8093 8100 		sts 129,r24
+ 349 02e8 8093 B000 		sts 176,r24
+ 350               	.L51:
+ 351 02ec 2091 B600 		lds r18,182
+ 352 02f0 8091 B600 		lds r24,182
+ 353 02f4 90E0      		ldi r25,lo8(0)
+ 354 02f6 8470      		andi r24,lo8(4)
+ 355 02f8 9070      		andi r25,hi8(4)
+ 356 02fa 30E0      		ldi r19,lo8(0)
+ 357 02fc 2170      		andi r18,lo8(1)
+ 358 02fe 3070      		andi r19,hi8(1)
+ 359 0300 822B      		or r24,r18
+ 360 0302 932B      		or r25,r19
+ 361 0304 892B      		or r24,r25
+ 362 0306 01F4      		brne .L51
+ 363 0308 4FEF      		ldi r20,lo8(-1)
+ 364 030a 51E0      		ldi r21,lo8(1)
+ 365               	.L61:
+ 366 030c 46BB      		out 54-32,r20
+ 367 030e 47BB      		out 55-32,r20
+ 368 0310 1092 8500 		sts 133,__zero_reg__
+ 369 0314 1092 8400 		sts 132,__zero_reg__
+ 370 0318 1092 B200 		sts 178,__zero_reg__
+ 371               	.L52:
+ 372 031c B99B      		sbis 55-32,1
+ 373 031e 00C0      		rjmp .L52
+ 374 0320 1092 8100 		sts 129,__zero_reg__
+ 375 0324 B09B      		sbis 54-32,0
+ 376 0326 00C0      		rjmp .L62
+ 377               	.L53:
+ 378 0328 8091 6600 		lds r24,102
+ 379 032c 8F5F      		subi r24,lo8(-(1))
+ 380 032e 8093 6600 		sts 102,r24
+ 381               	.L55:
+ 382 0332 5093 8100 		sts 129,r21
+ 383 0336 00C0      		rjmp .L61
+ 384               	.L62:
+ 385 0338 9091 8400 		lds r25,132
+ 386 033c 8091 8500 		lds r24,133
+ 387 0340 382F      		mov r19,r24
+ 388 0342 20E0      		ldi r18,lo8(0)
+ 389 0344 B901      		movw r22,r18
+ 390 0346 690F      		add r22,r25
+ 391 0348 711D      		adc r23,__zero_reg__
+ 392 034a CB01      		movw r24,r22
+ 393 034c 78E1      		ldi r23,hi8(6251)
+ 394 034e 8B36      		cpi r24,lo8(6251)
+ 395 0350 9707      		cpc r25,r23
+ 396 0352 04F0      		brlt .L54
+ 397 0354 8091 6600 		lds r24,102
+ 398 0358 8150      		subi r24,lo8(-(-1))
+ 399 035a 8093 6600 		sts 102,r24
+ 400 035e 00C0      		rjmp .L55
+ 401               	.L54:
+ 402 0360 885E      		subi r24,lo8(6120)
+ 403 0362 9741      		sbci r25,hi8(6120)
+ 404 0364 04F0      		brlt .L53
+ 405 0366 81E0      		ldi r24,lo8(1)
+ 406 0368 8093 8100 		sts 129,r24
+ 407               	/* epilogue start */
+ 408 036c 0895      		ret
+ 410               	.global	ControlloTXRX_terminate
+ 412               	ControlloTXRX_terminate:
+ 413               	/* prologue: function */
+ 414               	/* frame size = 0 */
+ 415               	/* epilogue start */
+ 416 036e 0895      		ret
+ 418               	.global	__vector_3
+ 420               	__vector_3:
+ 421 0370 1F92      		push __zero_reg__
+ 422 0372 0F92      		push r0
+ 423 0374 0FB6      		in r0,__SREG__
+ 424 0376 0F92      		push r0
+ 425 0378 1124      		clr __zero_reg__
+ 426 037a 2F93      		push r18
+ 427 037c 3F93      		push r19
+ 428 037e 4F93      		push r20
+ 429 0380 5F93      		push r21
+ 430 0382 8F93      		push r24
+ 431 0384 9F93      		push r25
+ 432               	/* prologue: Signal */
+ 433               	/* frame size = 0 */
+ 434 0386 8091 0000 		lds r24,start
+ 435 038a 8823      		tst r24
+ 436 038c 01F0      		breq .L75
+ 437 038e 23B1      		in r18,35-32
+ 438 0390 2478      		andi r18,lo8(-124)
+ 439 0392 822F      		mov r24,r18
+ 440 0394 90E0      		ldi r25,lo8(0)
+ 441 0396 8470      		andi r24,lo8(4)
+ 442 0398 9070      		andi r25,hi8(4)
+ 443 039a 9595      		asr r25
+ 444 039c 8795      		ror r24
+ 445 039e 9595      		asr r25
+ 446 03a0 8795      		ror r24
+ 447 03a2 382F      		mov r19,r24
+ 448 03a4 221F      		rol r18
+ 449 03a6 2227      		clr r18
+ 450 03a8 221F      		rol r18
+ 451 03aa 8130      		cpi r24,lo8(1)
+ 452 03ac 01F0      		breq .L76
+ 453               	.L68:
+ 454 03ae 2093 0000 		sts Bold,r18
+ 455 03b2 3093 0000 		sts Aold,r19
+ 456 03b6 81E0      		ldi r24,lo8(1)
+ 457 03b8 8093 0000 		sts start,r24
+ 458 03bc 8093 0000 		sts overflow,r24
+ 459               	.L74:
+ 460               	/* epilogue start */
+ 461 03c0 9F91      		pop r25
+ 462 03c2 8F91      		pop r24
+ 463 03c4 5F91      		pop r21
+ 464 03c6 4F91      		pop r20
+ 465 03c8 3F91      		pop r19
+ 466 03ca 2F91      		pop r18
+ 467 03cc 0F90      		pop r0
+ 468 03ce 0FBE      		out __SREG__,r0
+ 469 03d0 0F90      		pop r0
+ 470 03d2 1F90      		pop __zero_reg__
+ 471 03d4 1895      		reti
+ 472               	.L75:
+ 473 03d6 81E0      		ldi r24,lo8(1)
+ 474 03d8 8093 6F00 		sts 111,r24
+ 475 03dc 1092 8500 		sts (132)+1,__zero_reg__
+ 476 03e0 1092 8400 		sts 132,__zero_reg__
+ 477 03e4 8093 0000 		sts start,r24
+ 478 03e8 00C0      		rjmp .L74
+ 479               	.L76:
+ 480 03ea 8091 0000 		lds r24,Aold
+ 481 03ee 8823      		tst r24
+ 482 03f0 01F4      		brne .L68
+ 483 03f2 2130      		cpi r18,lo8(1)
+ 484 03f4 01F0      		breq .L77
+ 485 03f6 8091 0000 		lds r24,Encoder1
+ 486 03fa 9091 0000 		lds r25,(Encoder1)+1
+ 487 03fe 0196      		adiw r24,1
+ 488 0400 9093 0000 		sts (Encoder1)+1,r25
+ 489 0404 8093 0000 		sts Encoder1,r24
+ 490 0408 8091 8400 		lds r24,132
+ 491 040c 9091 8500 		lds r25,(132)+1
+ 492 0410 892B      		or r24,r25
+ 493 0412 01F4      		brne .L78
+ 494 0414 8091 8400 		lds r24,132
+ 495 0418 9091 8500 		lds r25,(132)+1
+ 496 041c 4427      		clr r20
+ 497 041e 5527      		clr r21
+ 498 0420 481B      		sub r20,r24
+ 499 0422 590B      		sbc r21,r25
+ 500               	.L73:
+ 501 0424 5093 0000 		sts (vel_tmp)+1,r21
+ 502 0428 4093 0000 		sts vel_tmp,r20
+ 503 042c 1092 8500 		sts (132)+1,__zero_reg__
+ 504 0430 1092 8400 		sts 132,__zero_reg__
+ 505 0434 8091 0000 		lds r24,VNow
+ 506 0438 8F5F      		subi r24,lo8(-(1))
+ 507 043a 8093 0000 		sts VNow,r24
+ 508 043e 00C0      		rjmp .L68
+ 509               	.L78:
+ 510 0440 4091 8400 		lds r20,132
+ 511 0444 5091 8500 		lds r21,(132)+1
+ 512 0448 00C0      		rjmp .L73
+ 513               	.L77:
+ 514 044a 8091 0000 		lds r24,Encoder1
+ 515 044e 9091 0000 		lds r25,(Encoder1)+1
+ 516 0452 0197      		sbiw r24,1
+ 517 0454 9093 0000 		sts (Encoder1)+1,r25
+ 518 0458 8093 0000 		sts Encoder1,r24
+ 519 045c 8091 8400 		lds r24,132
+ 520 0460 9091 8500 		lds r25,(132)+1
+ 521 0464 892B      		or r24,r25
+ 522 0466 01F0      		breq .L70
+ 523 0468 8091 8400 		lds r24,132
+ 524 046c 9091 8500 		lds r25,(132)+1
+ 525 0470 4427      		clr r20
+ 526 0472 5527      		clr r21
+ 527 0474 481B      		sub r20,r24
+ 528 0476 590B      		sbc r21,r25
+ 529               	.L71:
+ 530 0478 5093 0000 		sts (vel_tmp)+1,r21
+ 531 047c 4093 0000 		sts vel_tmp,r20
+ 532 0480 1092 8500 		sts (132)+1,__zero_reg__
+ 533 0484 1092 8400 		sts 132,__zero_reg__
+ 534 0488 8091 0000 		lds r24,VNow
+ 535 048c 8150      		subi r24,lo8(-(-1))
+ 536 048e 8093 0000 		sts VNow,r24
+ 537 0492 00C0      		rjmp .L68
+ 538               	.L70:
+ 539 0494 4091 8400 		lds r20,132
+ 540 0498 5091 8500 		lds r21,(132)+1
+ 541 049c 00C0      		rjmp .L71
+ 543               	.global	__vector_4
+ 545               	__vector_4:
+ 546 049e 1F92      		push __zero_reg__
+ 547 04a0 0F92      		push r0
+ 548 04a2 0FB6      		in r0,__SREG__
+ 549 04a4 0F92      		push r0
+ 550 04a6 1124      		clr __zero_reg__
+ 551 04a8 8F93      		push r24
+ 552 04aa 9F93      		push r25
+ 553               	/* prologue: Signal */
+ 554               	/* frame size = 0 */
+ 555 04ac 81E0      		ldi r24,lo8(1)
+ 556 04ae 90E0      		ldi r25,hi8(1)
+ 557 04b0 9093 0000 		sts (semaforo)+1,r25
+ 558 04b4 8093 0000 		sts semaforo,r24
+ 559               	/* epilogue start */
+ 560 04b8 9F91      		pop r25
+ 561 04ba 8F91      		pop r24
+ 562 04bc 0F90      		pop r0
+ 563 04be 0FBE      		out __SREG__,r0
+ 564 04c0 0F90      		pop r0
+ 565 04c2 1F90      		pop __zero_reg__
+ 566 04c4 1895      		reti
+ 568               	.global	__vector_9
+ 570               	__vector_9:
+ 571 04c6 1F92      		push __zero_reg__
+ 572 04c8 0F92      		push r0
+ 573 04ca 0FB6      		in r0,__SREG__
+ 574 04cc 0F92      		push r0
+ 575 04ce 1124      		clr __zero_reg__
+ 576               	/* prologue: Signal */
+ 577               	/* frame size = 0 */
+ 578 04d0 1092 0000 		sts overflow,__zero_reg__
+ 579 04d4 1092 6F00 		sts 111,__zero_reg__
+ 580 04d8 1092 0000 		sts start,__zero_reg__
+ 581               	/* epilogue start */
+ 582 04dc 0F90      		pop r0
+ 583 04de 0FBE      		out __SREG__,r0
+ 584 04e0 0F90      		pop r0
+ 585 04e2 1F90      		pop __zero_reg__
+ 586 04e4 1895      		reti
+ 588               	.global	__vector_2
+ 590               	__vector_2:
+ 591 04e6 1F92      		push __zero_reg__
+ 592 04e8 0F92      		push r0
+ 593 04ea 0FB6      		in r0,__SREG__
+ 594 04ec 0F92      		push r0
+ 595 04ee 1124      		clr __zero_reg__
+ 596 04f0 8F93      		push r24
+ 597 04f2 9F93      		push r25
+ 598               	/* prologue: Signal */
+ 599               	/* frame size = 0 */
+ 600 04f4 8CB1      		in r24,44-32
+ 601 04f6 8095      		com r24
+ 602 04f8 8C70      		andi r24,lo8(12)
+ 603 04fa 83FF      		sbrs r24,3
+ 604 04fc 00C0      		rjmp .L84
+ 605 04fe 80E4      		ldi r24,lo8(64)
+ 606 0500 8CBB      		out 60-32,r24
+ 607 0502 90E0      		ldi r25,lo8(0)
+ 608 0504 8091 0000 		lds r24,master_slave
+ 609 0508 8130      		cpi r24,lo8(1)
+ 610 050a 01F0      		breq .L85
+ 611 050c 91E0      		ldi r25,lo8(1)
+ 612               	.L85:
+ 613 050e 9093 0000 		sts master_slave,r25
+ 614               	/* epilogue start */
+ 615 0512 9F91      		pop r25
+ 616 0514 8F91      		pop r24
+ 617 0516 0F90      		pop r0
+ 618 0518 0FBE      		out __SREG__,r0
+ 619 051a 0F90      		pop r0
+ 620 051c 1F90      		pop __zero_reg__
+ 621 051e 1895      		reti
+ 622               	.L84:
+ 623 0520 80E4      		ldi r24,lo8(64)
+ 624 0522 8CBB      		out 60-32,r24
+ 625 0524 9F91      		pop r25
+ 626 0526 8F91      		pop r24
+ 627 0528 0F90      		pop r0
+ 628 052a 0FBE      		out __SREG__,r0
+ 629 052c 0F90      		pop r0
+ 630 052e 1F90      		pop __zero_reg__
+ 631 0530 1895      		reti
+ 633               	.global	ControlloTXRX_step
+ 635               	ControlloTXRX_step:
+ 636 0532 2F92      		push r2
+ 637 0534 3F92      		push r3
+ 638 0536 4F92      		push r4
+ 639 0538 5F92      		push r5
+ 640 053a 6F92      		push r6
+ 641 053c 7F92      		push r7
+ 642 053e 8F92      		push r8
+ 643 0540 9F92      		push r9
+ 644 0542 AF92      		push r10
+ 645 0544 BF92      		push r11
+ 646 0546 CF92      		push r12
+ 647 0548 DF92      		push r13
+ 648 054a EF92      		push r14
+ 649 054c FF92      		push r15
+ 650 054e 0F93      		push r16
+ 651 0550 1F93      		push r17
+ 652 0552 DF93      		push r29
+ 653 0554 CF93      		push r28
+ 654 0556 CDB7      		in r28,__SP_L__
+ 655 0558 DEB7      		in r29,__SP_H__
+ 656 055a AC97      		sbiw r28,44
+ 657 055c 0FB6      		in __tmp_reg__,__SREG__
+ 658 055e F894      		cli
+ 659 0560 DEBF      		out __SP_H__,r29
+ 660 0562 0FBE      		out __SREG__,__tmp_reg__
+ 661 0564 CDBF      		out __SP_L__,r28
+ 662               	/* prologue: function */
+ 663               	/* frame size = 44 */
+ 664 0566 8091 0000 		lds r24,DUTYmotore1
+ 665 056a 87BD      		out 71-32,r24
+ 666 056c 8091 0000 		lds r24,segno
+ 667 0570 8823      		tst r24
+ 668 0572 01F4      		brne .+2
+ 669 0574 00C0      		rjmp .L167
+ 670 0576 2B9A      		sbi 37-32,3
+ 671 0578 2998      		cbi 37-32,1
+ 672               	.L90:
+ 673 057a 6091 0000 		lds r22,Encoder1
+ 674 057e 7091 0000 		lds r23,(Encoder1)+1
+ 675 0582 8827      		clr r24
+ 676 0584 77FD      		sbrc r23,7
+ 677 0586 8095      		com r24
+ 678 0588 982F      		mov r25,r24
+ 679 058a 0E94 0000 		call __floatsisf
+ 680 058e 2BE3      		ldi r18,lo8(0x3c4e703b)
+ 681 0590 30E7      		ldi r19,hi8(0x3c4e703b)
+ 682 0592 4EE4      		ldi r20,hlo8(0x3c4e703b)
+ 683 0594 5CE3      		ldi r21,hhi8(0x3c4e703b)
+ 684 0596 0E94 0000 		call __mulsf3
+ 685 059a 7B01      		movw r14,r22
+ 686 059c 8C01      		movw r16,r24
+ 687 059e 6093 0000 		sts Posizione,r22
+ 688 05a2 7093 0000 		sts (Posizione)+1,r23
+ 689 05a6 8093 0000 		sts (Posizione)+2,r24
+ 690 05aa 9093 0000 		sts (Posizione)+3,r25
+ 691 05ae 8091 0000 		lds r24,overflow
+ 692 05b2 8130      		cpi r24,lo8(1)
+ 693 05b4 01F4      		brne .+2
+ 694 05b6 00C0      		rjmp .L168
+ 695 05b8 80E0      		ldi r24,lo8(0x0)
+ 696 05ba 90E0      		ldi r25,hi8(0x0)
+ 697 05bc A0E0      		ldi r26,hlo8(0x0)
+ 698 05be B0E0      		ldi r27,hhi8(0x0)
+ 699 05c0 8093 0000 		sts velocita1,r24
+ 700 05c4 9093 0000 		sts (velocita1)+1,r25
+ 701 05c8 A093 0000 		sts (velocita1)+2,r26
+ 702 05cc B093 0000 		sts (velocita1)+3,r27
+ 703               	.L92:
+ 704 05d0 1092 0000 		sts VNow,__zero_reg__
+ 705 05d4 6091 0000 		lds r22,Riferimento
+ 706 05d8 7091 0000 		lds r23,(Riferimento)+1
+ 707 05dc 8827      		clr r24
+ 708 05de 77FD      		sbrc r23,7
+ 709 05e0 8095      		com r24
+ 710 05e2 982F      		mov r25,r24
+ 711 05e4 0E94 0000 		call __floatsisf
+ 712 05e8 2091 0000 		lds r18,ControlloTXRX_P+4
+ 713 05ec 3091 0000 		lds r19,(ControlloTXRX_P+4)+1
+ 714 05f0 4091 0000 		lds r20,(ControlloTXRX_P+4)+2
+ 715 05f4 5091 0000 		lds r21,(ControlloTXRX_P+4)+3
+ 716 05f8 0E94 0000 		call __mulsf3
+ 717 05fc A801      		movw r20,r16
+ 718 05fe 9701      		movw r18,r14
+ 719 0600 0E94 0000 		call __subsf3
+ 720 0604 6D8F      		std Y+29,r22
+ 721 0606 7E8F      		std Y+30,r23
+ 722 0608 8F8F      		std Y+31,r24
+ 723 060a 98A3      		std Y+32,r25
+ 724 060c 8091 0000 		lds r24,ControlloTXRX_DWork+12
+ 725 0610 8823      		tst r24
+ 726 0612 01F4      		brne .+2
+ 727 0614 00C0      		rjmp .L93
+ 728 0616 8091 0000 		lds r24,ControlloTXRX_DWork
+ 729 061a 9091 0000 		lds r25,(ControlloTXRX_DWork)+1
+ 730 061e A091 0000 		lds r26,(ControlloTXRX_DWork)+2
+ 731 0622 B091 0000 		lds r27,(ControlloTXRX_DWork)+3
+ 732 0626 898B      		std Y+17,r24
+ 733 0628 9A8B      		std Y+18,r25
+ 734 062a AB8B      		std Y+19,r26
+ 735 062c BC8B      		std Y+20,r27
+ 736 062e 8091 0000 		lds r24,ControlloTXRX_P+12
+ 737 0632 9091 0000 		lds r25,(ControlloTXRX_P+12)+1
+ 738 0636 A091 0000 		lds r26,(ControlloTXRX_P+12)+2
+ 739 063a B091 0000 		lds r27,(ControlloTXRX_P+12)+3
+ 740 063e 8987      		std Y+9,r24
+ 741 0640 9A87      		std Y+10,r25
+ 742 0642 AB87      		std Y+11,r26
+ 743 0644 BC87      		std Y+12,r27
+ 744               	.L94:
+ 745 0646 9091 0000 		lds r25,ControlloTXRX_P+20
+ 746 064a 99A7      		std Y+41,r25
+ 747 064c A091 0000 		lds r26,ControlloTXRX_P+21
+ 748 0650 AAA7      		std Y+42,r26
+ 749 0652 B091 0000 		lds r27,ControlloTXRX_P+22
+ 750 0656 BBA7      		std Y+43,r27
+ 751 0658 E091 0000 		lds r30,ControlloTXRX_P+23
+ 752 065c ECA7      		std Y+44,r30
+ 753 065e 6989      		ldd r22,Y+17
+ 754 0660 7A89      		ldd r23,Y+18
+ 755 0662 8B89      		ldd r24,Y+19
+ 756 0664 9C89      		ldd r25,Y+20
+ 757 0666 29A5      		ldd r18,Y+41
+ 758 0668 3A2F      		mov r19,r26
+ 759 066a 4B2F      		mov r20,r27
+ 760 066c 5E2F      		mov r21,r30
+ 761 066e 0E94 0000 		call __gesf2
+ 762 0672 8823      		tst r24
+ 763 0674 04F4      		brge .+2
+ 764 0676 00C0      		rjmp .L158
+ 765 0678 89A5      		ldd r24,Y+41
+ 766 067a 9AA5      		ldd r25,Y+42
+ 767 067c ABA5      		ldd r26,Y+43
+ 768 067e BCA5      		ldd r27,Y+44
+ 769 0680 898B      		std Y+17,r24
+ 770 0682 9A8B      		std Y+18,r25
+ 771 0684 AB8B      		std Y+19,r26
+ 772 0686 BC8B      		std Y+20,r27
+ 773               	.L97:
+ 774 0688 6D8D      		ldd r22,Y+29
+ 775 068a 7E8D      		ldd r23,Y+30
+ 776 068c 8F8D      		ldd r24,Y+31
+ 777 068e 98A1      		ldd r25,Y+32
+ 778 0690 2091 0000 		lds r18,ControlloTXRX_P+8
+ 779 0694 3091 0000 		lds r19,(ControlloTXRX_P+8)+1
+ 780 0698 4091 0000 		lds r20,(ControlloTXRX_P+8)+2
+ 781 069c 5091 0000 		lds r21,(ControlloTXRX_P+8)+3
+ 782 06a0 0E94 0000 		call __mulsf3
+ 783 06a4 2989      		ldd r18,Y+17
+ 784 06a6 3A89      		ldd r19,Y+18
+ 785 06a8 4B89      		ldd r20,Y+19
+ 786 06aa 5C89      		ldd r21,Y+20
+ 787 06ac 0E94 0000 		call __addsf3
+ 788 06b0 2091 0000 		lds r18,velocita1
+ 789 06b4 3091 0000 		lds r19,(velocita1)+1
+ 790 06b8 4091 0000 		lds r20,(velocita1)+2
+ 791 06bc 5091 0000 		lds r21,(velocita1)+3
+ 792 06c0 0E94 0000 		call __subsf3
+ 793 06c4 698F      		std Y+25,r22
+ 794 06c6 7A8F      		std Y+26,r23
+ 795 06c8 8B8F      		std Y+27,r24
+ 796 06ca 9C8F      		std Y+28,r25
+ 797 06cc 8091 0000 		lds r24,ControlloTXRX_DWork+13
+ 798 06d0 8823      		tst r24
+ 799 06d2 01F4      		brne .+2
+ 800 06d4 00C0      		rjmp .L99
+ 801 06d6 8091 0000 		lds r24,ControlloTXRX_DWork+4
+ 802 06da 9091 0000 		lds r25,(ControlloTXRX_DWork+4)+1
+ 803 06de A091 0000 		lds r26,(ControlloTXRX_DWork+4)+2
+ 804 06e2 B091 0000 		lds r27,(ControlloTXRX_DWork+4)+3
+ 805 06e6 8D87      		std Y+13,r24
+ 806 06e8 9E87      		std Y+14,r25
+ 807 06ea AF87      		std Y+15,r26
+ 808 06ec B88B      		std Y+16,r27
+ 809 06ee 8091 0000 		lds r24,ControlloTXRX_P+32
+ 810 06f2 9091 0000 		lds r25,(ControlloTXRX_P+32)+1
+ 811 06f6 A091 0000 		lds r26,(ControlloTXRX_P+32)+2
+ 812 06fa B091 0000 		lds r27,(ControlloTXRX_P+32)+3
+ 813 06fe 8D83      		std Y+5,r24
+ 814 0700 9E83      		std Y+6,r25
+ 815 0702 AF83      		std Y+7,r26
+ 816 0704 B887      		std Y+8,r27
+ 817               	.L100:
+ 818 0706 9091 0000 		lds r25,ControlloTXRX_P+40
+ 819 070a 9DA3      		std Y+37,r25
+ 820 070c A091 0000 		lds r26,ControlloTXRX_P+41
+ 821 0710 AEA3      		std Y+38,r26
+ 822 0712 B091 0000 		lds r27,ControlloTXRX_P+42
+ 823 0716 BFA3      		std Y+39,r27
+ 824 0718 E091 0000 		lds r30,ControlloTXRX_P+43
+ 825 071c E8A7      		std Y+40,r30
+ 826 071e 6D85      		ldd r22,Y+13
+ 827 0720 7E85      		ldd r23,Y+14
+ 828 0722 8F85      		ldd r24,Y+15
+ 829 0724 9889      		ldd r25,Y+16
+ 830 0726 2DA1      		ldd r18,Y+37
+ 831 0728 3A2F      		mov r19,r26
+ 832 072a 4B2F      		mov r20,r27
+ 833 072c 5E2F      		mov r21,r30
+ 834 072e 0E94 0000 		call __gesf2
+ 835 0732 8823      		tst r24
+ 836 0734 04F4      		brge .+2
+ 837 0736 00C0      		rjmp .L159
+ 838 0738 8DA1      		ldd r24,Y+37
+ 839 073a 9EA1      		ldd r25,Y+38
+ 840 073c AFA1      		ldd r26,Y+39
+ 841 073e B8A5      		ldd r27,Y+40
+ 842 0740 8D87      		std Y+13,r24
+ 843 0742 9E87      		std Y+14,r25
+ 844 0744 AF87      		std Y+15,r26
+ 845 0746 B88B      		std Y+16,r27
+ 846               	.L103:
+ 847 0748 698D      		ldd r22,Y+25
+ 848 074a 7A8D      		ldd r23,Y+26
+ 849 074c 8B8D      		ldd r24,Y+27
+ 850 074e 9C8D      		ldd r25,Y+28
+ 851 0750 2091 0000 		lds r18,ControlloTXRX_P+28
+ 852 0754 3091 0000 		lds r19,(ControlloTXRX_P+28)+1
+ 853 0758 4091 0000 		lds r20,(ControlloTXRX_P+28)+2
+ 854 075c 5091 0000 		lds r21,(ControlloTXRX_P+28)+3
+ 855 0760 0E94 0000 		call __mulsf3
+ 856 0764 2D85      		ldd r18,Y+13
+ 857 0766 3E85      		ldd r19,Y+14
+ 858 0768 4F85      		ldd r20,Y+15
+ 859 076a 5889      		ldd r21,Y+16
+ 860 076c 0E94 0000 		call __addsf3
+ 861 0770 3B01      		movw r6,r22
+ 862 0772 4C01      		movw r8,r24
+ 863 0774 6093 0000 		sts I_cmd,r22
+ 864 0778 7093 0000 		sts (I_cmd)+1,r23
+ 865 077c 8093 0000 		sts (I_cmd)+2,r24
+ 866 0780 9093 0000 		sts (I_cmd)+3,r25
+ 867 0784 E090 0000 		lds r14,Rif_I
+ 868 0788 F090 0000 		lds r15,(Rif_I)+1
+ 869 078c 0091 0000 		lds r16,(Rif_I)+2
+ 870 0790 1091 0000 		lds r17,(Rif_I)+3
+ 871 0794 6091 0000 		lds r22,ControlloTXRX_P+52
+ 872 0798 7091 0000 		lds r23,(ControlloTXRX_P+52)+1
+ 873 079c 8091 0000 		lds r24,(ControlloTXRX_P+52)+2
+ 874 07a0 9091 0000 		lds r25,(ControlloTXRX_P+52)+3
+ 875 07a4 2091 0000 		lds r18,I
+ 876 07a8 3091 0000 		lds r19,(I)+1
+ 877 07ac 4091 0000 		lds r20,(I)+2
+ 878 07b0 5091 0000 		lds r21,(I)+3
+ 879 07b4 0E94 0000 		call __mulsf3
+ 880 07b8 9B01      		movw r18,r22
+ 881 07ba AC01      		movw r20,r24
+ 882 07bc C801      		movw r24,r16
+ 883 07be B701      		movw r22,r14
+ 884 07c0 0E94 0000 		call __subsf3
+ 885 07c4 6D8B      		std Y+21,r22
+ 886 07c6 7E8B      		std Y+22,r23
+ 887 07c8 8F8B      		std Y+23,r24
+ 888 07ca 988F      		std Y+24,r25
+ 889 07cc 8091 0000 		lds r24,ControlloTXRX_DWork+14
+ 890 07d0 8823      		tst r24
+ 891 07d2 01F4      		brne .+2
+ 892 07d4 00C0      		rjmp .L105
+ 893 07d6 2090 0000 		lds r2,ControlloTXRX_DWork+8
+ 894 07da 3090 0000 		lds r3,(ControlloTXRX_DWork+8)+1
+ 895 07de 4090 0000 		lds r4,(ControlloTXRX_DWork+8)+2
+ 896 07e2 5090 0000 		lds r5,(ControlloTXRX_DWork+8)+3
+ 897 07e6 8091 0000 		lds r24,ControlloTXRX_P+56
+ 898 07ea 9091 0000 		lds r25,(ControlloTXRX_P+56)+1
+ 899 07ee A091 0000 		lds r26,(ControlloTXRX_P+56)+2
+ 900 07f2 B091 0000 		lds r27,(ControlloTXRX_P+56)+3
+ 901 07f6 8983      		std Y+1,r24
+ 902 07f8 9A83      		std Y+2,r25
+ 903 07fa AB83      		std Y+3,r26
+ 904 07fc BC83      		std Y+4,r27
+ 905               	.L106:
+ 906 07fe 9091 0000 		lds r25,ControlloTXRX_P+64
+ 907 0802 99A3      		std Y+33,r25
+ 908 0804 A091 0000 		lds r26,ControlloTXRX_P+65
+ 909 0808 AAA3      		std Y+34,r26
+ 910 080a B091 0000 		lds r27,ControlloTXRX_P+66
+ 911 080e BBA3      		std Y+35,r27
+ 912 0810 E091 0000 		lds r30,ControlloTXRX_P+67
+ 913 0814 ECA3      		std Y+36,r30
+ 914 0816 C201      		movw r24,r4
+ 915 0818 B101      		movw r22,r2
+ 916 081a 29A1      		ldd r18,Y+33
+ 917 081c 3A2F      		mov r19,r26
+ 918 081e 4B2F      		mov r20,r27
+ 919 0820 5E2F      		mov r21,r30
+ 920 0822 0E94 0000 		call __gesf2
+ 921 0826 8823      		tst r24
+ 922 0828 04F4      		brge .+2
+ 923 082a 00C0      		rjmp .L160
+ 924 082c 89A1      		ldd r24,Y+33
+ 925 082e 9AA1      		ldd r25,Y+34
+ 926 0830 ABA1      		ldd r26,Y+35
+ 927 0832 BCA1      		ldd r27,Y+36
+ 928 0834 1C01      		movw r2,r24
+ 929 0836 2D01      		movw r4,r26
+ 930               	.L109:
+ 931 0838 2091 0000 		lds r18,ControlloTXRX_P+48
+ 932 083c 3091 0000 		lds r19,(ControlloTXRX_P+48)+1
+ 933 0840 4091 0000 		lds r20,(ControlloTXRX_P+48)+2
+ 934 0844 5091 0000 		lds r21,(ControlloTXRX_P+48)+3
+ 935 0848 9091 0000 		lds r25,ControlloTXRX_P+114
+ 936 084c 8091 0000 		lds r24,master_slave
+ 937 0850 9817      		cp r25,r24
+ 938 0852 04F0      		brlt .+2
+ 939 0854 00C0      		rjmp .L111
+ 940 0856 E090 0000 		lds r14,ControlloTXRX_P
+ 941 085a F090 0000 		lds r15,(ControlloTXRX_P)+1
+ 942 085e 0091 0000 		lds r16,(ControlloTXRX_P)+2
+ 943 0862 1091 0000 		lds r17,(ControlloTXRX_P)+3
+ 944               	.L112:
+ 945 0866 C801      		movw r24,r16
+ 946 0868 B701      		movw r22,r14
+ 947 086a 2091 0000 		lds r18,ControlloTXRX_P+80
+ 948 086e 3091 0000 		lds r19,(ControlloTXRX_P+80)+1
+ 949 0872 4091 0000 		lds r20,(ControlloTXRX_P+80)+2
+ 950 0876 5091 0000 		lds r21,(ControlloTXRX_P+80)+3
+ 951 087a 0E94 0000 		call __mulsf3
+ 952 087e 0E94 0000 		call floor
+ 953 0882 20E0      		ldi r18,lo8(0x47800000)
+ 954 0884 30E0      		ldi r19,hi8(0x47800000)
+ 955 0886 40E8      		ldi r20,hlo8(0x47800000)
+ 956 0888 57E4      		ldi r21,hhi8(0x47800000)
+ 957 088a 0E94 0000 		call fmod
+ 958 088e 7B01      		movw r14,r22
+ 959 0890 8C01      		movw r16,r24
+ 960 0892 5701      		movw r10,r14
+ 961 0894 6801      		movw r12,r16
+ 962 0896 C801      		movw r24,r16
+ 963 0898 B701      		movw r22,r14
+ 964 089a 20E0      		ldi r18,lo8(0x0)
+ 965 089c 30E0      		ldi r19,hi8(0x0)
+ 966 089e 40E0      		ldi r20,hlo8(0x0)
+ 967 08a0 50E0      		ldi r21,hhi8(0x0)
+ 968 08a2 0E94 0000 		call __ltsf2
+ 969 08a6 8823      		tst r24
+ 970 08a8 04F4      		brge .+2
+ 971 08aa 00C0      		rjmp .L169
+ 972 08ac C801      		movw r24,r16
+ 973 08ae B701      		movw r22,r14
+ 974 08b0 0E94 0000 		call __fixunssfsi
+ 975 08b4 CB01      		movw r24,r22
+ 976               	.L118:
+ 977 08b6 9093 0000 		sts (DUTYmotore1)+1,r25
+ 978 08ba 8093 0000 		sts DUTYmotore1,r24
+ 979 08be 1092 0000 		sts (DUTYmotore2)+1,__zero_reg__
+ 980 08c2 1092 0000 		sts DUTYmotore2,__zero_reg__
+ 981 08c6 8091 7A00 		lds r24,122
+ 982 08ca 8064      		ori r24,lo8(64)
+ 983 08cc 8093 7A00 		sts 122,r24
+ 984               	.L119:
+ 985 08d0 8091 7A00 		lds r24,122
+ 986 08d4 86FD      		sbrc r24,6
+ 987 08d6 00C0      		rjmp .L119
+ 988 08d8 6091 7800 		lds r22,120
+ 989 08dc 70E0      		ldi r23,lo8(0)
+ 990 08de 80E0      		ldi r24,lo8(0)
+ 991 08e0 90E0      		ldi r25,hi8(0)
+ 992 08e2 0E94 0000 		call __floatunsisf
+ 993 08e6 7B01      		movw r14,r22
+ 994 08e8 8C01      		movw r16,r24
+ 995 08ea 2091 7900 		lds r18,121
+ 996 08ee 722F      		mov r23,r18
+ 997 08f0 60E0      		ldi r22,lo8(0)
+ 998 08f2 8827      		clr r24
+ 999 08f4 77FD      		sbrc r23,7
+ 1000 08f6 8095      		com r24
+ 1001 08f8 982F      		mov r25,r24
+ 1002 08fa 0E94 0000 		call __floatsisf
+ 1003 08fe 9B01      		movw r18,r22
+ 1004 0900 AC01      		movw r20,r24
+ 1005 0902 C801      		movw r24,r16
+ 1006 0904 B701      		movw r22,r14
+ 1007 0906 0E94 0000 		call __addsf3
+ 1008 090a 22E3      		ldi r18,lo8(0x3bd33332)
+ 1009 090c 33E3      		ldi r19,hi8(0x3bd33332)
+ 1010 090e 43ED      		ldi r20,hlo8(0x3bd33332)
+ 1011 0910 5BE3      		ldi r21,hhi8(0x3bd33332)
+ 1012 0912 0E94 0000 		call __mulsf3
+ 1013 0916 6093 0000 		sts I,r22
+ 1014 091a 7093 0000 		sts (I)+1,r23
+ 1015 091e 8093 0000 		sts (I)+2,r24
+ 1016 0922 9093 0000 		sts (I)+3,r25
+ 1017 0926 C401      		movw r24,r8
+ 1018 0928 B301      		movw r22,r6
+ 1019 092a 20E0      		ldi r18,lo8(0x0)
+ 1020 092c 30E0      		ldi r19,hi8(0x0)
+ 1021 092e 40E0      		ldi r20,hlo8(0x0)
+ 1022 0930 50E0      		ldi r21,hhi8(0x0)
+ 1023 0932 0E94 0000 		call __ltsf2
+ 1024 0936 8823      		tst r24
+ 1025 0938 04F4      		brge .+2
+ 1026 093a 00C0      		rjmp .L170
+ 1027               	.L120:
+ 1028 093c C401      		movw r24,r8
+ 1029 093e B301      		movw r22,r6
+ 1030 0940 20E0      		ldi r18,lo8(0x0)
+ 1031 0942 30E0      		ldi r19,hi8(0x0)
+ 1032 0944 40E0      		ldi r20,hlo8(0x0)
+ 1033 0946 50E0      		ldi r21,hhi8(0x0)
+ 1034 0948 0E94 0000 		call __gtsf2
+ 1035 094c 1816      		cp __zero_reg__,r24
+ 1036 094e 04F4      		brge .L122
+ 1037 0950 1092 0000 		sts segno,__zero_reg__
+ 1038 0954 6092 0000 		sts Rif_I,r6
+ 1039 0958 7092 0000 		sts (Rif_I)+1,r7
+ 1040 095c 8092 0000 		sts (Rif_I)+2,r8
+ 1041 0960 9092 0000 		sts (Rif_I)+3,r9
+ 1042               	.L122:
+ 1043 0964 C401      		movw r24,r8
+ 1044 0966 B301      		movw r22,r6
+ 1045 0968 20E0      		ldi r18,lo8(0x0)
+ 1046 096a 30E0      		ldi r19,hi8(0x0)
+ 1047 096c 40E0      		ldi r20,hlo8(0x0)
+ 1048 096e 50E0      		ldi r21,hhi8(0x0)
+ 1049 0970 0E94 0000 		call __eqsf2
+ 1050 0974 8823      		tst r24
+ 1051 0976 01F4      		brne .L124
+ 1052 0978 80E0      		ldi r24,lo8(0x0)
+ 1053 097a 90E0      		ldi r25,hi8(0x0)
+ 1054 097c A0E0      		ldi r26,hlo8(0x0)
+ 1055 097e B0E0      		ldi r27,hhi8(0x0)
+ 1056 0980 8093 0000 		sts Rif_I,r24
+ 1057 0984 9093 0000 		sts (Rif_I)+1,r25
+ 1058 0988 A093 0000 		sts (Rif_I)+2,r26
+ 1059 098c B093 0000 		sts (Rif_I)+3,r27
+ 1060               	.L124:
+ 1061 0990 1092 0000 		sts ControlloTXRX_DWork+12,__zero_reg__
+ 1062 0994 6D8D      		ldd r22,Y+29
+ 1063 0996 7E8D      		ldd r23,Y+30
+ 1064 0998 8F8D      		ldd r24,Y+31
+ 1065 099a 98A1      		ldd r25,Y+32
+ 1066 099c 2985      		ldd r18,Y+9
+ 1067 099e 3A85      		ldd r19,Y+10
+ 1068 09a0 4B85      		ldd r20,Y+11
+ 1069 09a2 5C85      		ldd r21,Y+12
+ 1070 09a4 0E94 0000 		call __mulsf3
+ 1071 09a8 2989      		ldd r18,Y+17
+ 1072 09aa 3A89      		ldd r19,Y+18
+ 1073 09ac 4B89      		ldd r20,Y+19
+ 1074 09ae 5C89      		ldd r21,Y+20
+ 1075 09b0 0E94 0000 		call __addsf3
+ 1076 09b4 7B01      		movw r14,r22
+ 1077 09b6 8C01      		movw r16,r24
+ 1078 09b8 6093 0000 		sts ControlloTXRX_DWork,r22
+ 1079 09bc 7093 0000 		sts (ControlloTXRX_DWork)+1,r23
+ 1080 09c0 8093 0000 		sts (ControlloTXRX_DWork)+2,r24
+ 1081 09c4 9093 0000 		sts (ControlloTXRX_DWork)+3,r25
+ 1082 09c8 69A5      		ldd r22,Y+41
+ 1083 09ca 7AA5      		ldd r23,Y+42
+ 1084 09cc 8BA5      		ldd r24,Y+43
+ 1085 09ce 9CA5      		ldd r25,Y+44
+ 1086 09d0 A801      		movw r20,r16
+ 1087 09d2 9701      		movw r18,r14
+ 1088 09d4 0E94 0000 		call __lesf2
+ 1089 09d8 1816      		cp __zero_reg__,r24
+ 1090 09da 04F4      		brge .+2
+ 1091 09dc 00C0      		rjmp .L163
+ 1092 09de 89A5      		ldd r24,Y+41
+ 1093 09e0 9AA5      		ldd r25,Y+42
+ 1094 09e2 ABA5      		ldd r26,Y+43
+ 1095 09e4 BCA5      		ldd r27,Y+44
+ 1096 09e6 8093 0000 		sts ControlloTXRX_DWork,r24
+ 1097 09ea 9093 0000 		sts (ControlloTXRX_DWork)+1,r25
+ 1098 09ee A093 0000 		sts (ControlloTXRX_DWork)+2,r26
+ 1099 09f2 B093 0000 		sts (ControlloTXRX_DWork)+3,r27
+ 1100               	.L128:
+ 1101 09f6 1092 0000 		sts ControlloTXRX_DWork+13,__zero_reg__
+ 1102 09fa 698D      		ldd r22,Y+25
+ 1103 09fc 7A8D      		ldd r23,Y+26
+ 1104 09fe 8B8D      		ldd r24,Y+27
+ 1105 0a00 9C8D      		ldd r25,Y+28
+ 1106 0a02 2D81      		ldd r18,Y+5
+ 1107 0a04 3E81      		ldd r19,Y+6
+ 1108 0a06 4F81      		ldd r20,Y+7
+ 1109 0a08 5885      		ldd r21,Y+8
+ 1110 0a0a 0E94 0000 		call __mulsf3
+ 1111 0a0e 2D85      		ldd r18,Y+13
+ 1112 0a10 3E85      		ldd r19,Y+14
+ 1113 0a12 4F85      		ldd r20,Y+15
+ 1114 0a14 5889      		ldd r21,Y+16
+ 1115 0a16 0E94 0000 		call __addsf3
+ 1116 0a1a 7B01      		movw r14,r22
+ 1117 0a1c 8C01      		movw r16,r24
+ 1118 0a1e 6093 0000 		sts ControlloTXRX_DWork+4,r22
+ 1119 0a22 7093 0000 		sts (ControlloTXRX_DWork+4)+1,r23
+ 1120 0a26 8093 0000 		sts (ControlloTXRX_DWork+4)+2,r24
+ 1121 0a2a 9093 0000 		sts (ControlloTXRX_DWork+4)+3,r25
+ 1122 0a2e 6DA1      		ldd r22,Y+37
+ 1123 0a30 7EA1      		ldd r23,Y+38
+ 1124 0a32 8FA1      		ldd r24,Y+39
+ 1125 0a34 98A5      		ldd r25,Y+40
+ 1126 0a36 A801      		movw r20,r16
+ 1127 0a38 9701      		movw r18,r14
+ 1128 0a3a 0E94 0000 		call __lesf2
+ 1129 0a3e 1816      		cp __zero_reg__,r24
+ 1130 0a40 04F4      		brge .+2
+ 1131 0a42 00C0      		rjmp .L164
+ 1132 0a44 8DA1      		ldd r24,Y+37
+ 1133 0a46 9EA1      		ldd r25,Y+38
+ 1134 0a48 AFA1      		ldd r26,Y+39
+ 1135 0a4a B8A5      		ldd r27,Y+40
+ 1136 0a4c 8093 0000 		sts ControlloTXRX_DWork+4,r24
+ 1137 0a50 9093 0000 		sts (ControlloTXRX_DWork+4)+1,r25
+ 1138 0a54 A093 0000 		sts (ControlloTXRX_DWork+4)+2,r26
+ 1139 0a58 B093 0000 		sts (ControlloTXRX_DWork+4)+3,r27
+ 1140               	.L132:
+ 1141 0a5c 1092 0000 		sts ControlloTXRX_DWork+14,__zero_reg__
+ 1142 0a60 6D89      		ldd r22,Y+21
+ 1143 0a62 7E89      		ldd r23,Y+22
+ 1144 0a64 8F89      		ldd r24,Y+23
+ 1145 0a66 988D      		ldd r25,Y+24
+ 1146 0a68 2981      		ldd r18,Y+1
+ 1147 0a6a 3A81      		ldd r19,Y+2
+ 1148 0a6c 4B81      		ldd r20,Y+3
+ 1149 0a6e 5C81      		ldd r21,Y+4
+ 1150 0a70 0E94 0000 		call __mulsf3
+ 1151 0a74 A201      		movw r20,r4
+ 1152 0a76 9101      		movw r18,r2
+ 1153 0a78 0E94 0000 		call __addsf3
+ 1154 0a7c 7B01      		movw r14,r22
+ 1155 0a7e 8C01      		movw r16,r24
+ 1156 0a80 6093 0000 		sts ControlloTXRX_DWork+8,r22
+ 1157 0a84 7093 0000 		sts (ControlloTXRX_DWork+8)+1,r23
+ 1158 0a88 8093 0000 		sts (ControlloTXRX_DWork+8)+2,r24
+ 1159 0a8c 9093 0000 		sts (ControlloTXRX_DWork+8)+3,r25
+ 1160 0a90 69A1      		ldd r22,Y+33
+ 1161 0a92 7AA1      		ldd r23,Y+34
+ 1162 0a94 8BA1      		ldd r24,Y+35
+ 1163 0a96 9CA1      		ldd r25,Y+36
+ 1164 0a98 A801      		movw r20,r16
+ 1165 0a9a 9701      		movw r18,r14
+ 1166 0a9c 0E94 0000 		call __lesf2
+ 1167 0aa0 1816      		cp __zero_reg__,r24
+ 1168 0aa2 04F0      		brlt .+2
+ 1169 0aa4 00C0      		rjmp .L171
+ 1170 0aa6 A090 0000 		lds r10,ControlloTXRX_P+68
+ 1171 0aaa B090 0000 		lds r11,(ControlloTXRX_P+68)+1
+ 1172 0aae C090 0000 		lds r12,(ControlloTXRX_P+68)+2
+ 1173 0ab2 D090 0000 		lds r13,(ControlloTXRX_P+68)+3
+ 1174 0ab6 C801      		movw r24,r16
+ 1175 0ab8 B701      		movw r22,r14
+ 1176 0aba A601      		movw r20,r12
+ 1177 0abc 9501      		movw r18,r10
+ 1178 0abe 0E94 0000 		call __lesf2
+ 1179 0ac2 1816      		cp __zero_reg__,r24
+ 1180 0ac4 04F0      		brlt .L138
+ 1181 0ac6 A092 0000 		sts ControlloTXRX_DWork+8,r10
+ 1182 0aca B092 0000 		sts (ControlloTXRX_DWork+8)+1,r11
+ 1183 0ace C092 0000 		sts (ControlloTXRX_DWork+8)+2,r12
+ 1184 0ad2 D092 0000 		sts (ControlloTXRX_DWork+8)+3,r13
+ 1185               	.L138:
+ 1186               	/* epilogue start */
+ 1187 0ad6 AC96      		adiw r28,44
+ 1188 0ad8 0FB6      		in __tmp_reg__,__SREG__
+ 1189 0ada F894      		cli
+ 1190 0adc DEBF      		out __SP_H__,r29
+ 1191 0ade 0FBE      		out __SREG__,__tmp_reg__
+ 1192 0ae0 CDBF      		out __SP_L__,r28
+ 1193 0ae2 CF91      		pop r28
+ 1194 0ae4 DF91      		pop r29
+ 1195 0ae6 1F91      		pop r17
+ 1196 0ae8 0F91      		pop r16
+ 1197 0aea FF90      		pop r15
+ 1198 0aec EF90      		pop r14
+ 1199 0aee DF90      		pop r13
+ 1200 0af0 CF90      		pop r12
+ 1201 0af2 BF90      		pop r11
+ 1202 0af4 AF90      		pop r10
+ 1203 0af6 9F90      		pop r9
+ 1204 0af8 8F90      		pop r8
+ 1205 0afa 7F90      		pop r7
+ 1206 0afc 6F90      		pop r6
+ 1207 0afe 5F90      		pop r5
+ 1208 0b00 4F90      		pop r4
+ 1209 0b02 3F90      		pop r3
+ 1210 0b04 2F90      		pop r2
+ 1211 0b06 0895      		ret
+ 1212               	.L164:
+ 1213 0b08 A090 0000 		lds r10,ControlloTXRX_P+44
+ 1214 0b0c B090 0000 		lds r11,(ControlloTXRX_P+44)+1
+ 1215 0b10 C090 0000 		lds r12,(ControlloTXRX_P+44)+2
+ 1216 0b14 D090 0000 		lds r13,(ControlloTXRX_P+44)+3
+ 1217 0b18 C801      		movw r24,r16
+ 1218 0b1a B701      		movw r22,r14
+ 1219 0b1c A601      		movw r20,r12
+ 1220 0b1e 9501      		movw r18,r10
+ 1221 0b20 0E94 0000 		call __lesf2
+ 1222 0b24 1816      		cp __zero_reg__,r24
+ 1223 0b26 04F4      		brge .+2
+ 1224 0b28 00C0      		rjmp .L132
+ 1225 0b2a A092 0000 		sts ControlloTXRX_DWork+4,r10
+ 1226 0b2e B092 0000 		sts (ControlloTXRX_DWork+4)+1,r11
+ 1227 0b32 C092 0000 		sts (ControlloTXRX_DWork+4)+2,r12
+ 1228 0b36 D092 0000 		sts (ControlloTXRX_DWork+4)+3,r13
+ 1229 0b3a 00C0      		rjmp .L132
+ 1230               	.L163:
+ 1231 0b3c A090 0000 		lds r10,ControlloTXRX_P+24
+ 1232 0b40 B090 0000 		lds r11,(ControlloTXRX_P+24)+1
+ 1233 0b44 C090 0000 		lds r12,(ControlloTXRX_P+24)+2
+ 1234 0b48 D090 0000 		lds r13,(ControlloTXRX_P+24)+3
+ 1235 0b4c C801      		movw r24,r16
+ 1236 0b4e B701      		movw r22,r14
+ 1237 0b50 A601      		movw r20,r12
+ 1238 0b52 9501      		movw r18,r10
+ 1239 0b54 0E94 0000 		call __lesf2
+ 1240 0b58 1816      		cp __zero_reg__,r24
+ 1241 0b5a 04F4      		brge .+2
+ 1242 0b5c 00C0      		rjmp .L128
+ 1243 0b5e A092 0000 		sts ControlloTXRX_DWork,r10
+ 1244 0b62 B092 0000 		sts (ControlloTXRX_DWork)+1,r11
+ 1245 0b66 C092 0000 		sts (ControlloTXRX_DWork)+2,r12
+ 1246 0b6a D092 0000 		sts (ControlloTXRX_DWork)+3,r13
+ 1247 0b6e 00C0      		rjmp .L128
+ 1248               	.L111:
+ 1249 0b70 C801      		movw r24,r16
+ 1250 0b72 B701      		movw r22,r14
+ 1251 0b74 0E94 0000 		call __mulsf3
+ 1252 0b78 A201      		movw r20,r4
+ 1253 0b7a 9101      		movw r18,r2
+ 1254 0b7c 0E94 0000 		call __addsf3
+ 1255 0b80 7B01      		movw r14,r22
+ 1256 0b82 8C01      		movw r16,r24
+ 1257 0b84 D090 0000 		lds r13,ControlloTXRX_P+72
+ 1258 0b88 C090 0000 		lds r12,ControlloTXRX_P+73
+ 1259 0b8c B090 0000 		lds r11,ControlloTXRX_P+74
+ 1260 0b90 A090 0000 		lds r10,ControlloTXRX_P+75
+ 1261 0b94 2D2D      		mov r18,r13
+ 1262 0b96 3C2D      		mov r19,r12
+ 1263 0b98 4B2D      		mov r20,r11
+ 1264 0b9a 5A2D      		mov r21,r10
+ 1265 0b9c 0E94 0000 		call __gesf2
+ 1266 0ba0 8823      		tst r24
+ 1267 0ba2 04F4      		brge .+2
+ 1268 0ba4 00C0      		rjmp .L161
+ 1269 0ba6 8D2D      		mov r24,r13
+ 1270 0ba8 9C2D      		mov r25,r12
+ 1271 0baa AB2D      		mov r26,r11
+ 1272 0bac BA2D      		mov r27,r10
+ 1273 0bae 7C01      		movw r14,r24
+ 1274 0bb0 8D01      		movw r16,r26
+ 1275 0bb2 00C0      		rjmp .L112
+ 1276               	.L160:
+ 1277 0bb4 D090 0000 		lds r13,ControlloTXRX_P+68
+ 1278 0bb8 C090 0000 		lds r12,ControlloTXRX_P+69
+ 1279 0bbc B090 0000 		lds r11,ControlloTXRX_P+70
+ 1280 0bc0 A090 0000 		lds r10,ControlloTXRX_P+71
+ 1281 0bc4 C201      		movw r24,r4
+ 1282 0bc6 B101      		movw r22,r2
+ 1283 0bc8 2D2D      		mov r18,r13
+ 1284 0bca 3C2D      		mov r19,r12
+ 1285 0bcc 4B2D      		mov r20,r11
+ 1286 0bce 5A2D      		mov r21,r10
+ 1287 0bd0 0E94 0000 		call __lesf2
+ 1288 0bd4 1816      		cp __zero_reg__,r24
+ 1289 0bd6 04F4      		brge .+2
+ 1290 0bd8 00C0      		rjmp .L109
+ 1291 0bda 8D2D      		mov r24,r13
+ 1292 0bdc 9C2D      		mov r25,r12
+ 1293 0bde AB2D      		mov r26,r11
+ 1294 0be0 BA2D      		mov r27,r10
+ 1295 0be2 1C01      		movw r2,r24
+ 1296 0be4 2D01      		movw r4,r26
+ 1297 0be6 00C0      		rjmp .L109
+ 1298               	.L105:
+ 1299 0be8 8091 0000 		lds r24,ControlloTXRX_P+56
+ 1300 0bec 9091 0000 		lds r25,(ControlloTXRX_P+56)+1
+ 1301 0bf0 A091 0000 		lds r26,(ControlloTXRX_P+56)+2
+ 1302 0bf4 B091 0000 		lds r27,(ControlloTXRX_P+56)+3
+ 1303 0bf8 8983      		std Y+1,r24
+ 1304 0bfa 9A83      		std Y+2,r25
+ 1305 0bfc AB83      		std Y+3,r26
+ 1306 0bfe BC83      		std Y+4,r27
+ 1307 0c00 BC01      		movw r22,r24
+ 1308 0c02 CD01      		movw r24,r26
+ 1309 0c04 2D89      		ldd r18,Y+21
+ 1310 0c06 3E89      		ldd r19,Y+22
+ 1311 0c08 4F89      		ldd r20,Y+23
+ 1312 0c0a 588D      		ldd r21,Y+24
+ 1313 0c0c 0E94 0000 		call __mulsf3
+ 1314 0c10 2091 0000 		lds r18,ControlloTXRX_DWork+8
+ 1315 0c14 3091 0000 		lds r19,(ControlloTXRX_DWork+8)+1
+ 1316 0c18 4091 0000 		lds r20,(ControlloTXRX_DWork+8)+2
+ 1317 0c1c 5091 0000 		lds r21,(ControlloTXRX_DWork+8)+3
+ 1318 0c20 0E94 0000 		call __addsf3
+ 1319 0c24 1B01      		movw r2,r22
+ 1320 0c26 2C01      		movw r4,r24
+ 1321 0c28 00C0      		rjmp .L106
+ 1322               	.L159:
+ 1323 0c2a 1091 0000 		lds r17,ControlloTXRX_P+44
+ 1324 0c2e 0091 0000 		lds r16,ControlloTXRX_P+45
+ 1325 0c32 F090 0000 		lds r15,ControlloTXRX_P+46
+ 1326 0c36 E090 0000 		lds r14,ControlloTXRX_P+47
+ 1327 0c3a 6D85      		ldd r22,Y+13
+ 1328 0c3c 7E85      		ldd r23,Y+14
+ 1329 0c3e 8F85      		ldd r24,Y+15
+ 1330 0c40 9889      		ldd r25,Y+16
+ 1331 0c42 212F      		mov r18,r17
+ 1332 0c44 302F      		mov r19,r16
+ 1333 0c46 4F2D      		mov r20,r15
+ 1334 0c48 5E2D      		mov r21,r14
+ 1335 0c4a 0E94 0000 		call __lesf2
+ 1336 0c4e 1816      		cp __zero_reg__,r24
+ 1337 0c50 04F4      		brge .+2
+ 1338 0c52 00C0      		rjmp .L103
+ 1339 0c54 812F      		mov r24,r17
+ 1340 0c56 902F      		mov r25,r16
+ 1341 0c58 AF2D      		mov r26,r15
+ 1342 0c5a BE2D      		mov r27,r14
+ 1343 0c5c 8D87      		std Y+13,r24
+ 1344 0c5e 9E87      		std Y+14,r25
+ 1345 0c60 AF87      		std Y+15,r26
+ 1346 0c62 B88B      		std Y+16,r27
+ 1347 0c64 00C0      		rjmp .L103
+ 1348               	.L99:
+ 1349 0c66 8091 0000 		lds r24,ControlloTXRX_P+32
+ 1350 0c6a 9091 0000 		lds r25,(ControlloTXRX_P+32)+1
+ 1351 0c6e A091 0000 		lds r26,(ControlloTXRX_P+32)+2
+ 1352 0c72 B091 0000 		lds r27,(ControlloTXRX_P+32)+3
+ 1353 0c76 8D83      		std Y+5,r24
+ 1354 0c78 9E83      		std Y+6,r25
+ 1355 0c7a AF83      		std Y+7,r26
+ 1356 0c7c B887      		std Y+8,r27
+ 1357 0c7e BC01      		movw r22,r24
+ 1358 0c80 CD01      		movw r24,r26
+ 1359 0c82 298D      		ldd r18,Y+25
+ 1360 0c84 3A8D      		ldd r19,Y+26
+ 1361 0c86 4B8D      		ldd r20,Y+27
+ 1362 0c88 5C8D      		ldd r21,Y+28
+ 1363 0c8a 0E94 0000 		call __mulsf3
+ 1364 0c8e 2091 0000 		lds r18,ControlloTXRX_DWork+4
+ 1365 0c92 3091 0000 		lds r19,(ControlloTXRX_DWork+4)+1
+ 1366 0c96 4091 0000 		lds r20,(ControlloTXRX_DWork+4)+2
+ 1367 0c9a 5091 0000 		lds r21,(ControlloTXRX_DWork+4)+3
+ 1368 0c9e 0E94 0000 		call __addsf3
+ 1369 0ca2 6D87      		std Y+13,r22
+ 1370 0ca4 7E87      		std Y+14,r23
+ 1371 0ca6 8F87      		std Y+15,r24
+ 1372 0ca8 988B      		std Y+16,r25
+ 1373 0caa 00C0      		rjmp .L100
+ 1374               	.L158:
+ 1375 0cac 1091 0000 		lds r17,ControlloTXRX_P+24
+ 1376 0cb0 0091 0000 		lds r16,ControlloTXRX_P+25
+ 1377 0cb4 F090 0000 		lds r15,ControlloTXRX_P+26
+ 1378 0cb8 E090 0000 		lds r14,ControlloTXRX_P+27
+ 1379 0cbc 6989      		ldd r22,Y+17
+ 1380 0cbe 7A89      		ldd r23,Y+18
+ 1381 0cc0 8B89      		ldd r24,Y+19
+ 1382 0cc2 9C89      		ldd r25,Y+20
+ 1383 0cc4 212F      		mov r18,r17
+ 1384 0cc6 302F      		mov r19,r16
+ 1385 0cc8 4F2D      		mov r20,r15
+ 1386 0cca 5E2D      		mov r21,r14
+ 1387 0ccc 0E94 0000 		call __lesf2
+ 1388 0cd0 1816      		cp __zero_reg__,r24
+ 1389 0cd2 04F4      		brge .+2
+ 1390 0cd4 00C0      		rjmp .L97
+ 1391 0cd6 812F      		mov r24,r17
+ 1392 0cd8 902F      		mov r25,r16
+ 1393 0cda AF2D      		mov r26,r15
+ 1394 0cdc BE2D      		mov r27,r14
+ 1395 0cde 898B      		std Y+17,r24
+ 1396 0ce0 9A8B      		std Y+18,r25
+ 1397 0ce2 AB8B      		std Y+19,r26
+ 1398 0ce4 BC8B      		std Y+20,r27
+ 1399 0ce6 00C0      		rjmp .L97
+ 1400               	.L93:
+ 1401 0ce8 8091 0000 		lds r24,ControlloTXRX_P+12
+ 1402 0cec 9091 0000 		lds r25,(ControlloTXRX_P+12)+1
+ 1403 0cf0 A091 0000 		lds r26,(ControlloTXRX_P+12)+2
+ 1404 0cf4 B091 0000 		lds r27,(ControlloTXRX_P+12)+3
+ 1405 0cf8 8987      		std Y+9,r24
+ 1406 0cfa 9A87      		std Y+10,r25
+ 1407 0cfc AB87      		std Y+11,r26
+ 1408 0cfe BC87      		std Y+12,r27
+ 1409 0d00 BC01      		movw r22,r24
+ 1410 0d02 CD01      		movw r24,r26
+ 1411 0d04 2D8D      		ldd r18,Y+29
+ 1412 0d06 3E8D      		ldd r19,Y+30
+ 1413 0d08 4F8D      		ldd r20,Y+31
+ 1414 0d0a 58A1      		ldd r21,Y+32
+ 1415 0d0c 0E94 0000 		call __mulsf3
+ 1416 0d10 2091 0000 		lds r18,ControlloTXRX_DWork
+ 1417 0d14 3091 0000 		lds r19,(ControlloTXRX_DWork)+1
+ 1418 0d18 4091 0000 		lds r20,(ControlloTXRX_DWork)+2
+ 1419 0d1c 5091 0000 		lds r21,(ControlloTXRX_DWork)+3
+ 1420 0d20 0E94 0000 		call __addsf3
+ 1421 0d24 698B      		std Y+17,r22
+ 1422 0d26 7A8B      		std Y+18,r23
+ 1423 0d28 8B8B      		std Y+19,r24
+ 1424 0d2a 9C8B      		std Y+20,r25
+ 1425 0d2c 00C0      		rjmp .L94
+ 1426               	.L161:
+ 1427 0d2e D090 0000 		lds r13,ControlloTXRX_P+76
+ 1428 0d32 C090 0000 		lds r12,ControlloTXRX_P+77
+ 1429 0d36 B090 0000 		lds r11,ControlloTXRX_P+78
+ 1430 0d3a A090 0000 		lds r10,ControlloTXRX_P+79
+ 1431 0d3e C801      		movw r24,r16
+ 1432 0d40 B701      		movw r22,r14
+ 1433 0d42 2D2D      		mov r18,r13
+ 1434 0d44 3C2D      		mov r19,r12
+ 1435 0d46 4B2D      		mov r20,r11
+ 1436 0d48 5A2D      		mov r21,r10
+ 1437 0d4a 0E94 0000 		call __lesf2
+ 1438 0d4e 1816      		cp __zero_reg__,r24
+ 1439 0d50 04F4      		brge .+2
+ 1440 0d52 00C0      		rjmp .L112
+ 1441 0d54 8D2D      		mov r24,r13
+ 1442 0d56 9C2D      		mov r25,r12
+ 1443 0d58 AB2D      		mov r26,r11
+ 1444 0d5a BA2D      		mov r27,r10
+ 1445 0d5c 7C01      		movw r14,r24
+ 1446 0d5e 8D01      		movw r16,r26
+ 1447 0d60 00C0      		rjmp .L112
+ 1448               	.L167:
+ 1449 0d62 2B98      		cbi 37-32,3
+ 1450 0d64 299A      		sbi 37-32,1
+ 1451 0d66 00C0      		rjmp .L90
+ 1452               	.L171:
+ 1453 0d68 89A1      		ldd r24,Y+33
+ 1454 0d6a 9AA1      		ldd r25,Y+34
+ 1455 0d6c ABA1      		ldd r26,Y+35
+ 1456 0d6e BCA1      		ldd r27,Y+36
+ 1457 0d70 8093 0000 		sts ControlloTXRX_DWork+8,r24
+ 1458 0d74 9093 0000 		sts (ControlloTXRX_DWork+8)+1,r25
+ 1459 0d78 A093 0000 		sts (ControlloTXRX_DWork+8)+2,r26
+ 1460 0d7c B093 0000 		sts (ControlloTXRX_DWork+8)+3,r27
+ 1461 0d80 00C0      		rjmp .L138
+ 1462               	.L170:
+ 1463 0d82 81E0      		ldi r24,lo8(1)
+ 1464 0d84 8093 0000 		sts segno,r24
+ 1465 0d88 D401      		movw r26,r8
+ 1466 0d8a C301      		movw r24,r6
+ 1467 0d8c B058      		subi r27,0x80
+ 1468 0d8e 8093 0000 		sts Rif_I,r24
+ 1469 0d92 9093 0000 		sts (Rif_I)+1,r25
+ 1470 0d96 A093 0000 		sts (Rif_I)+2,r26
+ 1471 0d9a B093 0000 		sts (Rif_I)+3,r27
+ 1472 0d9e 00C0      		rjmp .L120
+ 1473               	.L169:
+ 1474 0da0 C601      		movw r24,r12
+ 1475 0da2 B501      		movw r22,r10
+ 1476 0da4 9058      		subi r25,0x80
+ 1477 0da6 0E94 0000 		call __fixunssfsi
+ 1478 0daa 8827      		clr r24
+ 1479 0dac 9927      		clr r25
+ 1480 0dae 861B      		sub r24,r22
+ 1481 0db0 970B      		sbc r25,r23
+ 1482 0db2 00C0      		rjmp .L118
+ 1483               	.L168:
+ 1484 0db4 6091 0000 		lds r22,vel_tmp
+ 1485 0db8 7091 0000 		lds r23,(vel_tmp)+1
+ 1486 0dbc 8DE0      		ldi r24,lo8(12557)
+ 1487 0dbe 91E3      		ldi r25,hi8(12557)
+ 1488 0dc0 0E94 0000 		call __divmodhi4
+ 1489 0dc4 8827      		clr r24
+ 1490 0dc6 77FD      		sbrc r23,7
+ 1491 0dc8 8095      		com r24
+ 1492 0dca 982F      		mov r25,r24
+ 1493 0dcc 0E94 0000 		call __floatsisf
+ 1494 0dd0 6093 0000 		sts velocita1,r22
+ 1495 0dd4 7093 0000 		sts (velocita1)+1,r23
+ 1496 0dd8 8093 0000 		sts (velocita1)+2,r24
+ 1497 0ddc 9093 0000 		sts (velocita1)+3,r25
+ 1498 0de0 00C0      		rjmp .L92
+ 1500               	.global	ControlloTXRX_initialize
+ 1502               	ControlloTXRX_initialize:
+ 1503               	/* prologue: function */
+ 1504               	/* frame size = 0 */
+ 1505 0de2 E091 0000 		lds r30,ControlloTXRX_M
+ 1506 0de6 F091 0000 		lds r31,(ControlloTXRX_M)+1
+ 1507 0dea 1182      		std Z+1,__zero_reg__
+ 1508 0dec 1082      		st Z,__zero_reg__
+ 1509 0dee E0E0      		ldi r30,lo8(ControlloTXRX_DWork)
+ 1510 0df0 F0E0      		ldi r31,hi8(ControlloTXRX_DWork)
+ 1511 0df2 8FE0      		ldi r24,lo8(15)
+ 1512 0df4 DF01      		movw r26,r30
+ 1513 0df6 1D92      		st X+,__zero_reg__
+ 1514 0df8 8A95      	        dec r24
+ 1515 0dfa 01F4      		brne .-6
+ 1516 0dfc 80E8      		ldi r24,lo8(-128)
+ 1517 0dfe 8093 6100 		sts 97,r24
+ 1518 0e02 83E0      		ldi r24,lo8(3)
+ 1519 0e04 8093 6100 		sts 97,r24
+ 1520 0e08 1092 7000 		sts 112,__zero_reg__
+ 1521 0e0c 88E0      		ldi r24,lo8(8)
+ 1522 0e0e 8093 B600 		sts 182,r24
+ 1523 0e12 88EC      		ldi r24,lo8(-56)
+ 1524 0e14 8093 B300 		sts 179,r24
+ 1525 0e18 1092 6E00 		sts 110,__zero_reg__
+ 1526 0e1c 81E0      		ldi r24,lo8(1)
+ 1527 0e1e 8093 8100 		sts 129,r24
+ 1528 0e22 8093 B000 		sts 176,r24
+ 1529               	.L173:
+ 1530 0e26 2091 B600 		lds r18,182
+ 1531 0e2a 8091 B600 		lds r24,182
+ 1532 0e2e 90E0      		ldi r25,lo8(0)
+ 1533 0e30 8470      		andi r24,lo8(4)
+ 1534 0e32 9070      		andi r25,hi8(4)
+ 1535 0e34 30E0      		ldi r19,lo8(0)
+ 1536 0e36 2170      		andi r18,lo8(1)
+ 1537 0e38 3070      		andi r19,hi8(1)
+ 1538 0e3a 822B      		or r24,r18
+ 1539 0e3c 932B      		or r25,r19
+ 1540 0e3e 892B      		or r24,r25
+ 1541 0e40 01F4      		brne .L173
+ 1542 0e42 4FEF      		ldi r20,lo8(-1)
+ 1543 0e44 51E0      		ldi r21,lo8(1)
+ 1544               	.L183:
+ 1545 0e46 46BB      		out 54-32,r20
+ 1546 0e48 47BB      		out 55-32,r20
+ 1547 0e4a 1092 8500 		sts 133,__zero_reg__
+ 1548 0e4e 1092 8400 		sts 132,__zero_reg__
+ 1549 0e52 1092 B200 		sts 178,__zero_reg__
+ 1550               	.L174:
+ 1551 0e56 B99B      		sbis 55-32,1
+ 1552 0e58 00C0      		rjmp .L174
+ 1553 0e5a 1092 8100 		sts 129,__zero_reg__
+ 1554 0e5e B09B      		sbis 54-32,0
+ 1555 0e60 00C0      		rjmp .L184
+ 1556               	.L175:
+ 1557 0e62 8091 6600 		lds r24,102
+ 1558 0e66 8F5F      		subi r24,lo8(-(1))
+ 1559 0e68 8093 6600 		sts 102,r24
+ 1560               	.L177:
+ 1561 0e6c 5093 8100 		sts 129,r21
+ 1562 0e70 00C0      		rjmp .L183
+ 1563               	.L184:
+ 1564 0e72 9091 8400 		lds r25,132
+ 1565 0e76 8091 8500 		lds r24,133
+ 1566 0e7a 382F      		mov r19,r24
+ 1567 0e7c 20E0      		ldi r18,lo8(0)
+ 1568 0e7e B901      		movw r22,r18
+ 1569 0e80 690F      		add r22,r25
+ 1570 0e82 711D      		adc r23,__zero_reg__
+ 1571 0e84 CB01      		movw r24,r22
+ 1572 0e86 78E1      		ldi r23,hi8(6251)
+ 1573 0e88 8B36      		cpi r24,lo8(6251)
+ 1574 0e8a 9707      		cpc r25,r23
+ 1575 0e8c 04F0      		brlt .L176
+ 1576 0e8e 8091 6600 		lds r24,102
+ 1577 0e92 8150      		subi r24,lo8(-(-1))
+ 1578 0e94 8093 6600 		sts 102,r24
+ 1579 0e98 00C0      		rjmp .L177
+ 1580               	.L176:
+ 1581 0e9a 885E      		subi r24,lo8(6120)
+ 1582 0e9c 9741      		sbci r25,hi8(6120)
+ 1583 0e9e 04F0      		brlt .L175
+ 1584 0ea0 21E0      		ldi r18,lo8(1)
+ 1585 0ea2 2093 8100 		sts 129,r18
+ 1586 0ea6 80E8      		ldi r24,lo8(-128)
+ 1587 0ea8 8093 6100 		sts 97,r24
+ 1588 0eac 1092 6100 		sts 97,__zero_reg__
+ 1589 0eb0 1092 6400 		sts 100,__zero_reg__
+ 1590 0eb4 89E6      		ldi r24,lo8(105)
+ 1591 0eb6 84BD      		out 68-32,r24
+ 1592 0eb8 17BC      		out 71-32,__zero_reg__
+ 1593 0eba 1092 6E00 		sts 110,__zero_reg__
+ 1594 0ebe 8CE0      		ldi r24,lo8(12)
+ 1595 0ec0 8093 B000 		sts 176,r24
+ 1596 0ec4 8CE7      		ldi r24,lo8(124)
+ 1597 0ec6 8093 B300 		sts 179,r24
+ 1598 0eca 92E0      		ldi r25,lo8(2)
+ 1599 0ecc 9093 7000 		sts 112,r25
+ 1600 0ed0 1092 B600 		sts 182,__zero_reg__
+ 1601 0ed4 10BA      		out 48-32,__zero_reg__
+ 1602 0ed6 11BA      		out 49-32,__zero_reg__
+ 1603 0ed8 1092 C500 		sts 197,__zero_reg__
+ 1604 0edc 88E0      		ldi r24,lo8(8)
+ 1605 0ede 8093 C400 		sts 196,r24
+ 1606 0ee2 9093 C000 		sts 192,r25
+ 1607 0ee6 88E9      		ldi r24,lo8(-104)
+ 1608 0ee8 8093 C100 		sts 193,r24
+ 1609 0eec 86E0      		ldi r24,lo8(6)
+ 1610 0eee 8093 C200 		sts 194,r24
+ 1611 0ef2 8AE7      		ldi r24,lo8(122)
+ 1612 0ef4 84B9      		out 36-32,r24
+ 1613 0ef6 15B8      		out 37-32,__zero_reg__
+ 1614 0ef8 8091 6C00 		lds r24,108
+ 1615 0efc 8460      		ori r24,lo8(4)
+ 1616 0efe 8093 6C00 		sts 108,r24
+ 1617 0f02 E79A      		sbi 60-32,7
+ 1618 0f04 EF9A      		sbi 61-32,7
+ 1619 0f06 1092 8000 		sts 128,__zero_reg__
+ 1620 0f0a 9093 8100 		sts 129,r25
+ 1621 0f0e 1092 6F00 		sts 111,__zero_reg__
+ 1622 0f12 81EC      		ldi r24,lo8(-63)
+ 1623 0f14 8093 7C00 		sts 124,r24
+ 1624 0f18 86E8      		ldi r24,lo8(-122)
+ 1625 0f1a 8093 7A00 		sts 122,r24
+ 1626 0f1e 8DB1      		in r24,45-32
+ 1627 0f20 837F      		andi r24,lo8(-13)
+ 1628 0f22 8DB9      		out 45-32,r24
+ 1629 0f24 8EB1      		in r24,46-32
+ 1630 0f26 8C60      		ori r24,lo8(12)
+ 1631 0f28 8EB9      		out 46-32,r24
+ 1632 0f2a 8091 6B00 		lds r24,107
+ 1633 0f2e 8C60      		ori r24,lo8(12)
+ 1634 0f30 8093 6B00 		sts 107,r24
+ 1635 0f34 E69A      		sbi 60-32,6
+ 1636 0f36 EE9A      		sbi 61-32,6
+ 1637 0f38 8091 0000 		lds r24,ControlloTXRX_P+104
+ 1638 0f3c 9091 0000 		lds r25,(ControlloTXRX_P+104)+1
+ 1639 0f40 9093 0000 		sts (DUTYmotore1)+1,r25
+ 1640 0f44 8093 0000 		sts DUTYmotore1,r24
+ 1641 0f48 8091 0000 		lds r24,ControlloTXRX_P+106
+ 1642 0f4c 9091 0000 		lds r25,(ControlloTXRX_P+106)+1
+ 1643 0f50 9093 0000 		sts (DUTYmotore2)+1,r25
+ 1644 0f54 8093 0000 		sts DUTYmotore2,r24
+ 1645 0f58 8091 0000 		lds r24,ControlloTXRX_P+108
+ 1646 0f5c 9091 0000 		lds r25,(ControlloTXRX_P+108)+1
+ 1647 0f60 9093 0000 		sts (Riferimento)+1,r25
+ 1648 0f64 8093 0000 		sts Riferimento,r24
+ 1649 0f68 8091 0000 		lds r24,ControlloTXRX_P+115
+ 1650 0f6c 8093 0000 		sts segno,r24
+ 1651 0f70 8091 0000 		lds r24,ControlloTXRX_P+110
+ 1652 0f74 9091 0000 		lds r25,(ControlloTXRX_P+110)+1
+ 1653 0f78 9093 0000 		sts (Encoder1)+1,r25
+ 1654 0f7c 8093 0000 		sts Encoder1,r24
+ 1655 0f80 8091 0000 		lds r24,ControlloTXRX_P+84
+ 1656 0f84 9091 0000 		lds r25,(ControlloTXRX_P+84)+1
+ 1657 0f88 A091 0000 		lds r26,(ControlloTXRX_P+84)+2
+ 1658 0f8c B091 0000 		lds r27,(ControlloTXRX_P+84)+3
+ 1659 0f90 8093 0000 		sts Posizione,r24
+ 1660 0f94 9093 0000 		sts (Posizione)+1,r25
+ 1661 0f98 A093 0000 		sts (Posizione)+2,r26
+ 1662 0f9c B093 0000 		sts (Posizione)+3,r27
+ 1663 0fa0 8091 0000 		lds r24,ControlloTXRX_P+88
+ 1664 0fa4 9091 0000 		lds r25,(ControlloTXRX_P+88)+1
+ 1665 0fa8 A091 0000 		lds r26,(ControlloTXRX_P+88)+2
+ 1666 0fac B091 0000 		lds r27,(ControlloTXRX_P+88)+3
+ 1667 0fb0 8093 0000 		sts velocita1,r24
+ 1668 0fb4 9093 0000 		sts (velocita1)+1,r25
+ 1669 0fb8 A093 0000 		sts (velocita1)+2,r26
+ 1670 0fbc B093 0000 		sts (velocita1)+3,r27
+ 1671 0fc0 8091 0000 		lds r24,ControlloTXRX_P+92
+ 1672 0fc4 9091 0000 		lds r25,(ControlloTXRX_P+92)+1
+ 1673 0fc8 A091 0000 		lds r26,(ControlloTXRX_P+92)+2
+ 1674 0fcc B091 0000 		lds r27,(ControlloTXRX_P+92)+3
+ 1675 0fd0 8093 0000 		sts I,r24
+ 1676 0fd4 9093 0000 		sts (I)+1,r25
+ 1677 0fd8 A093 0000 		sts (I)+2,r26
+ 1678 0fdc B093 0000 		sts (I)+3,r27
+ 1679 0fe0 8091 0000 		lds r24,ControlloTXRX_P+96
+ 1680 0fe4 9091 0000 		lds r25,(ControlloTXRX_P+96)+1
+ 1681 0fe8 A091 0000 		lds r26,(ControlloTXRX_P+96)+2
+ 1682 0fec B091 0000 		lds r27,(ControlloTXRX_P+96)+3
+ 1683 0ff0 8093 0000 		sts Rif_I,r24
+ 1684 0ff4 9093 0000 		sts (Rif_I)+1,r25
+ 1685 0ff8 A093 0000 		sts (Rif_I)+2,r26
+ 1686 0ffc B093 0000 		sts (Rif_I)+3,r27
+ 1687 1000 8091 0000 		lds r24,ControlloTXRX_P+116
+ 1688 1004 8093 0000 		sts master_slave,r24
+ 1689 1008 8091 0000 		lds r24,ControlloTXRX_P+100
+ 1690 100c 9091 0000 		lds r25,(ControlloTXRX_P+100)+1
+ 1691 1010 A091 0000 		lds r26,(ControlloTXRX_P+100)+2
+ 1692 1014 B091 0000 		lds r27,(ControlloTXRX_P+100)+3
+ 1693 1018 8093 0000 		sts I_cmd,r24
+ 1694 101c 9093 0000 		sts (I_cmd)+1,r25
+ 1695 1020 A093 0000 		sts (I_cmd)+2,r26
+ 1696 1024 B093 0000 		sts (I_cmd)+3,r27
+ 1697 1028 1092 0000 		sts (rif)+1,__zero_reg__
+ 1698 102c 1092 0000 		sts rif,__zero_reg__
+ 1699 1030 1092 0000 		sts jRx,__zero_reg__
+ 1700 1034 8FEF      		ldi r24,lo8(-1)
+ 1701 1036 8093 0000 		sts TCHAR,r24
+ 1702 103a 1092 0000 		sts Aold,__zero_reg__
+ 1703 103e 1092 0000 		sts Bold,__zero_reg__
+ 1704 1042 1092 0000 		sts VNow,__zero_reg__
+ 1705 1046 1092 0000 		sts (vel_tmp)+1,__zero_reg__
+ 1706 104a 1092 0000 		sts vel_tmp,__zero_reg__
+ 1707 104e 1092 0000 		sts start,__zero_reg__
+ 1708 1052 1092 0000 		sts overflow,__zero_reg__
+ 1709 1056 8091 0000 		lds r24,ControlloTXRX_P+16
+ 1710 105a 9091 0000 		lds r25,(ControlloTXRX_P+16)+1
+ 1711 105e A091 0000 		lds r26,(ControlloTXRX_P+16)+2
+ 1712 1062 B091 0000 		lds r27,(ControlloTXRX_P+16)+3
+ 1713 1066 8093 0000 		sts ControlloTXRX_DWork,r24
+ 1714 106a 9093 0000 		sts (ControlloTXRX_DWork)+1,r25
+ 1715 106e A093 0000 		sts (ControlloTXRX_DWork)+2,r26
+ 1716 1072 B093 0000 		sts (ControlloTXRX_DWork)+3,r27
+ 1717 1076 8091 0000 		lds r24,ControlloTXRX_P+36
+ 1718 107a 9091 0000 		lds r25,(ControlloTXRX_P+36)+1
+ 1719 107e A091 0000 		lds r26,(ControlloTXRX_P+36)+2
+ 1720 1082 B091 0000 		lds r27,(ControlloTXRX_P+36)+3
+ 1721 1086 8093 0000 		sts ControlloTXRX_DWork+4,r24
+ 1722 108a 9093 0000 		sts (ControlloTXRX_DWork+4)+1,r25
+ 1723 108e A093 0000 		sts (ControlloTXRX_DWork+4)+2,r26
+ 1724 1092 B093 0000 		sts (ControlloTXRX_DWork+4)+3,r27
+ 1725 1096 8091 0000 		lds r24,ControlloTXRX_P+60
+ 1726 109a 9091 0000 		lds r25,(ControlloTXRX_P+60)+1
+ 1727 109e A091 0000 		lds r26,(ControlloTXRX_P+60)+2
+ 1728 10a2 B091 0000 		lds r27,(ControlloTXRX_P+60)+3
+ 1729 10a6 8093 0000 		sts ControlloTXRX_DWork+8,r24
+ 1730 10aa 9093 0000 		sts (ControlloTXRX_DWork+8)+1,r25
+ 1731 10ae A093 0000 		sts (ControlloTXRX_DWork+8)+2,r26
+ 1732 10b2 B093 0000 		sts (ControlloTXRX_DWork+8)+3,r27
+ 1733 10b6 2093 0000 		sts ControlloTXRX_DWork+12,r18
+ 1734 10ba 2093 0000 		sts ControlloTXRX_DWork+13,r18
+ 1735 10be 2093 0000 		sts ControlloTXRX_DWork+14,r18
+ 1736               	/* epilogue start */
+ 1737 10c2 0895      		ret
+ 1739               	.global	ControlloTXRX_M
+ 1740               		.data
+ 1743               	ControlloTXRX_M:
+ 1744 0000 0000      		.word	ControlloTXRX_M_
+ 1745               		.comm rif,2,1
+ 1746               		.comm jRx,1,1
+ 1747               		.comm TCHAR,1,1
+ 1748               		.comm TCHARL1,1,1
+ 1749               		.comm TCHARH1,1,1
+ 1750               		.comm TCHARL2,1,1
+ 1751               		.comm TCHARH2,1,1
+ 1752               		.comm Aold,1,1
+ 1753               		.comm Bold,1,1
+ 1754               		.comm vel_tmp,2,1
+ 1755               		.comm start,1,1
+ 1756               		.comm overflow,1,1
+ 1757               		.comm VNow,1,1
+ 1758               		.comm semaforo,2,1
+ 1759               		.comm ControlloTXRX_DWork,15,1
+ 1760               		.comm Posizione,4,1
+ 1761               		.comm velocita1,4,1
+ 1762               		.comm I,4,1
+ 1763               		.comm Rif_I,4,1
+ 1764               		.comm I_cmd,4,1
+ 1765               		.comm DUTYmotore1,2,1
+ 1766               		.comm DUTYmotore2,2,1
+ 1767               		.comm Riferimento,2,1
+ 1768               		.comm Encoder1,2,1
+ 1769               		.comm segno,1,1
+ 1770               		.comm master_slave,1,1
+ 1771               		.comm ControlloTXRX_M_,2,1
+ 1772               	.global __do_copy_data
+ 1773               	.global __do_clear_bss
+DEFINED SYMBOLS
+                            *ABS*:00000000 ControlloTXRX.c
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:2      *ABS*:0000003f __SREG__
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:3      *ABS*:0000003e __SP_H__
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:4      *ABS*:0000003d __SP_L__
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:5      *ABS*:00000034 __CCP__
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:11     .text:00000000 comandaMotore
+                            *COM*:00000002 DUTYmotore1
+                            *COM*:00000001 segno
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:29     .text:0000001a __vector_13
+                            *COM*:00000001 jRx
+                            *COM*:00000002 rif
+                            *COM*:00000002 Riferimento
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:103    .text:000000ca ADC_read
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:149    .text:00000128 TX
+                            *COM*:00000002 Encoder1
+                            *COM*:00000004 Posizione
+                            *COM*:00000001 TCHARL1
+                            *COM*:00000001 TCHARH1
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:273    .text:00000238 agg_vel
+                            *COM*:00000001 overflow
+                            *COM*:00000004 velocita1
+                            *COM*:00000001 VNow
+                            *COM*:00000002 vel_tmp
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:326    .text:000002c0 Delay
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:334    .text:000002c2 OSCCAL_calibration
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:412    .text:0000036e ControlloTXRX_terminate
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:420    .text:00000370 __vector_3
+                            *COM*:00000001 start
+                            *COM*:00000001 Bold
+                            *COM*:00000001 Aold
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:545    .text:0000049e __vector_4
+                            *COM*:00000002 semaforo
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:570    .text:000004c6 __vector_9
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:590    .text:000004e6 __vector_2
+                            *COM*:00000001 master_slave
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:635    .text:00000532 ControlloTXRX_step
+                            *COM*:0000000f ControlloTXRX_DWork
+                            *COM*:00000004 I_cmd
+                            *COM*:00000004 Rif_I
+                            *COM*:00000004 I
+                            *COM*:00000002 DUTYmotore2
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:1502   .text:00000de2 ControlloTXRX_initialize
+C:\Users\AMMINI~1\AppData\Local\Temp/cceZTRAq.s:1743   .data:00000000 ControlloTXRX_M
+                            *COM*:00000001 TCHAR
+                            *COM*:00000002 ControlloTXRX_M_
+                            *COM*:00000001 TCHARL2
+                            *COM*:00000001 TCHARH2
+
+UNDEFINED SYMBOLS
+__floatunsisf
+__floatsisf
+__addsf3
+__mulsf3
+__divmodhi4
+__fixsfsi
+ControlloTXRX_P
+__subsf3
+__gesf2
+floor
+fmod
+__ltsf2
+__fixunssfsi
+__gtsf2
+__eqsf2
+__lesf2
+__do_copy_data
+__do_clear_bss
