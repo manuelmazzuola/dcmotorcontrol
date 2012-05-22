@@ -272,7 +272,7 @@ static volatile int comando=0;
 volatile char t = 2;
 volatile char c = 0;
 
-void rxInterrupt(char var) { //var è udr passata dall' interruzione
+void rxInterrupt(char var) { //var ï¿½ udr passata dall' interruzione
     static volatile uint16_t rif = 0;
     
 	if(jRx == 0) {        
@@ -289,7 +289,7 @@ void rxInterrupt(char var) { //var è udr passata dall' interruzione
         
         //LCD_Off();
         
-		//if(t == 0) { //Velocità
+		//if(t == 0) { //Velocitï¿½
             //if(rif > MAX_VEL) {
             //    rif = Riferimento = jRx = 0;
                 //LCD_Init();
@@ -439,7 +439,7 @@ int main(void)
     ///******************///   
     
     //TIMER0        
-    TCCR0A = 11; //modalità CTC senza connessione con pin OC0A e prescaler clk/64                                                                                                                                                                                                                                                                                                             
+    TCCR0A = 11; //modalitï¿½ CTC senza connessione con pin OC0A e prescaler clk/64                                                                                                                                                                                                                                                                                                             
     OCR0A = 124;  //(interruzione con f = fosc/64*(1+OCR0A)  Interrupt 1KHz                                                                                                                                                                                                                                                                                                    
     TIMSK0  = 0;   //attivazione intettuzione timer0 su compare 2
     DDRF=0x00; //PortF ingresso                                                                                                                                                                                                                                                                                                                                                              
@@ -508,7 +508,7 @@ int main(void)
         rt_OneStep();
         
 	}
-} /* end main */
+} /* end main */ 
 
 
 
